@@ -1,0 +1,27 @@
+{
+  "canisters": {
+    "minepro_staking_backend": {
+      "candid": "src/minepro_staking_backend/minepro_staking_backend.did",
+      "package": "minepro_staking_backend",
+      "type": "rust"
+    },
+    "minepro_staking_frontend": {
+      "dependencies": [
+        "minepro_staking_backend"
+      ],
+      "source": [
+        "src/minepro_staking_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "minepro_staking_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

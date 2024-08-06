@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "src/minepro_staking_backend"
+]
+resolver = "2"
