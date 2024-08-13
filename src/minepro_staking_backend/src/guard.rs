@@ -1,8 +1,10 @@
-use crate::state::{mutate_state, GuardState};
+use crate::state::mutate_state;
 
 use candid::{CandidType, Deserialize, Principal};
 use serde::Serialize;
 use std::marker::PhantomData;
+
+const MAX_CONCURRENT: usize = 100;
 
 /// Guards a block from executing twice when called by the same user and from being
 /// executed [MAX_CONCURRENT] or more times in parallel.
@@ -22,21 +24,25 @@ impl GuardPrincipal {
     /// Attempts to create a new guard for the current block. Fails if there is
     /// already a pending request for the specified [principal] or if there
     /// are at least [MAX_CONCURRENT] pending requests.
-    pub fn new() -> Result<(), ()> {
+    pub fn new(principal: Principal) -> Result<Self, GuardError> {
         mutate_state(|s| {
-            if matches!(s.state_guard, GuardState::GuardLocked) {
-                return Err(());
+            if s.principal_guards.contains(&principal) {
+                return Err(GuardError::AlreadyProcessing);
             }
-
-            Ok(())
+            if s.principal_guards.len() >= MAX_CONCURRENT {
+                return Err(GuardError::TooManyConcurrentRequests);
+            }
+            s.principal_guards.insert(principal);
+            Ok(Self {
+                principal,
+                _marker: PhantomData,
+            })
         })
     }
 }
 
 impl Drop for GuardPrincipal {
     fn drop(&mut self) {
-        mutate_state(|s| {
-            s.state_guard = GuardState::GuardUnlocked;
-        });
+        mutate_state(|s| s.principal_guards.remove(&self.principal));
     }
 }
