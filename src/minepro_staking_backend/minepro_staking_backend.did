@@ -1,3 +1,37 @@
-service : {
-    "greet": (text) -> (text) query;
+type Account = record { owner : principal; subaccount : opt blob };
+type InitArgs = record {
+  reward : Account;
+  token : Account;
+  leave_early_fee : nat;
+  fee_recipient : Account;
+  lock_time : nat64;
+};
+type Metadata = record {
+  reward : principal;
+  token : principal;
+  leave_early_fee : nat;
+  fee_recipient : principal;
+  lock_time : nat64;
+};
+type Result = variant { Ok; Err : StakingError };
+type StakingError = variant {
+  NothingToClaim;
+  NoShare;
+  Busy;
+  ZeroAmount;
+  InsufficientBalance;
+  RaceCondition;
+  TransferTokenFailed;
+  UserDoesNotExist;
+};
+service : (InitArgs) -> {
+  balanceOf : (principal) -> (nat) query;
+  claimRewards : () -> (Result);
+  depositRewards : (nat, opt blob) -> (Result);
+  getMetadata : () -> (Metadata) query;
+  pendingRewards : () -> (nat) query;
+  stake : (nat, opt blob) -> (Result);
+  totalRewards : () -> (nat) query;
+  totalSupply : () -> (nat) query;
+  withdraw : (nat) -> (Result);
 }

@@ -3,8 +3,8 @@ extern crate ic_cdk_macros;
 #[macro_use]
 extern crate serde;
 
-use candid::{CandidType, Principal};
-use ic_cdk::api;
+use candid::{candid_method, CandidType, Principal};
+use ic_cdk::{api, storage};
 use icrc_ledger_types::icrc1::account::Account;
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens, TransferArg, TransferError};
 use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromError};
@@ -23,21 +23,33 @@ fn reject_anonymous_call() {
 
 #[derive(CandidType, Deserialize)]
 struct InitArgs {
-    token: Principal,
-    reward: Principal,
-    fee_recipient: Principal,
+    token: Account,
+    reward: Account,
+    fee_recipient: Account,
     leave_early_fee: NumTokens,
     lock_time: u64,
 }
 
+#[pre_upgrade]
+fn pre_upgrade() {
+    read_state(|s| storage::stable_save((s,)).unwrap());
+}
+
+#[post_upgrade]
+fn post_upgrade() {
+    let (old_state,): (State,) = storage::stable_restore().unwrap();
+    replace_state(old_state);
+}
+
 #[init]
+#[candid_method(init)]
 fn init(args: InitArgs) {
     replace_state(State {
         lock_time: args.lock_time,
         leave_early_fee: args.leave_early_fee,
-        fee_recipient: args.fee_recipient,
-        token: args.token,
-        reward: args.reward,
+        fee_recipient: args.fee_recipient.owner,
+        token: args.token.owner,
+        reward: args.reward.owner,
 
         users: HashMap::new(),
         principal_guards: BTreeSet::new(),
@@ -63,6 +75,41 @@ fn balance_of(user: Principal) -> NumTokens {
             Some(u) => u.amount.clone(),
             _ => NumTokens::from(0u8),
         }
+    })
+}
+
+#[query(name = "totalRewards")]
+fn total_rewards() -> NumTokens {
+    read_state(|s| s.total_rewards.clone())
+}
+
+#[query(name = "pendingRewards")]
+fn pending_rewards() -> NumTokens {
+    read_state(|s| {
+        match s.users.get(&api::caller()) {
+            Some(user) => s.pending_rewards(&api::caller()) + user.rewards_to_claim.clone(),
+            None => NumTokens::from(0u8),
+        }
+    })
+}
+
+#[derive(CandidType, Deserialize)]
+struct Metadata {
+    pub lock_time: u64,
+    pub leave_early_fee: NumTokens,
+    pub fee_recipient: Principal,
+    pub token: Principal,
+    pub reward: Principal,
+}
+
+#[query(name = "getMetadata")]
+fn get_metadata() -> Metadata {
+    read_state(|s| Metadata{
+        lock_time: s.lock_time,
+        leave_early_fee: s.leave_early_fee.clone(),
+        fee_recipient: s.fee_recipient,
+        token: s.token,
+        reward: s.reward,
     })
 }
 
@@ -198,7 +245,7 @@ async fn deposit_rewards(amount: NumTokens, subaccount: Option<[u8; 32]>) -> Res
         return Err(StakingError::NoShare);
     }
 
-    let reward_token_principal = read_state(|s| s.token);
+    let reward_token_principal = read_state(|s| s.reward);
     let transfer_from_args = TransferFromArgs {
         from: Account::from(principal),
         memo: None,
@@ -387,3 +434,5 @@ pub enum StakingError {
     RaceCondition,
     NoShare,
 }
+
+ic_cdk::export_candid!();
