@@ -1,5 +1,8 @@
 {
   "minepro_staking_backend": {
     "ic": "mwrwg-4yaaa-aaaap-qhswq-cai"
+  },
+  "minepro_staking_frontend": {
+    "ic": "pgc4a-ayaaa-aaaap-qhs6q-cai"
   }
 }
