@@ -20,6 +20,9 @@ function App() {
 
   const [stakeAmount, setStakeAmount] = useState<string>('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [transferAmount, setTransferAmount] = useState('');
+  const [transferTokenPrincipal, setTransferTokenPrincipal] = useState('');
+  const [transferTokenTo, setTransferTokenTo] = useState('');
 
   async function handleConnect() {
     const authClient = await AuthClient.create();
@@ -189,6 +192,36 @@ function App() {
 
     window.alert("Claimed rewards success");
     fetchUserInfo();
+  }
+
+  async function handleTransfer() {
+    const agent = await HttpAgent.create({ identity });
+    const tokenActor = createTokenActor(transferTokenPrincipal, { agent });
+
+    try {
+      const res = await tokenActor.icrc1_transfer({
+        to: {
+          owner: Principal.fromText(transferTokenTo),
+          subaccount: [],
+        },
+        amount: BigInt(transferAmount),
+        fee: [],
+        memo: [],
+        from_subaccount: [],
+        created_at_time: [],
+      });
+
+      if (res.Err) {
+        console.log(res.Err);
+        window.alert("Transfer token failed");
+        return;
+      }
+
+      window.alert("Transfer token success");
+    } catch (e) {
+      console.log(e);
+      window.alert("Transfer token failed");
+    }
   }
 
   useEffect(() => {
