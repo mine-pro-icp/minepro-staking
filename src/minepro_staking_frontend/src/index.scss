@@ -15,6 +15,19 @@ form {
   align-items: baseline;
 }
 
+input {
+  border: 1px solid rgba(242, 222, 247, 0.12);
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: rgba(255, 255, 255, 0.6);
+  size: 14px;
+  flex-grow: 1;
+}
+input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
 button[type="submit"] {
   padding: 5px 20px;
   margin: 10px auto;
@@ -30,6 +43,12 @@ p {
   size: 1rem;
   max-width: 700px;
   text-align: center;
+}
+
+hr {
+  border: 1px solid rgba(242, 222, 247, 0.12);
+  width: 100%;
+  margin: 1rem 0;
 }
 
 #greeting {
@@ -122,6 +141,17 @@ main {
   size: 32px;
 }
 
+.tabs {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 8px;
+  margin: 1rem auto;
+}
+.tab {
+  width: 100px;
+}
+
 .stakingCard {
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(242, 222, 247, 0.2);
@@ -134,6 +164,10 @@ main {
   display: flex;
   flex-direction: column;
   gap: 8px;
+
+  width: 90%;
+  max-width: 440px;
+  margin: 0 auto;
 }
 .stakingCard::before {
   content: "";
@@ -150,6 +184,32 @@ main {
     rgba(255, 255, 255, 0) 50%,
     rgba(255, 255, 255, 0) 100%
   );
+}
+
+.enterAmount {
+  display: flex;
+  flex-direction: column;
+}
+
+.enterAmountRow {
+  margin: .5rem 0 0 0;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
+.enterAmountRow:first-child {
+  flex-grow: 1;
+}
+
+button {
+  padding: 8px 12px;
+  // background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(242, 222, 247, 0.2);
+  backdrop-filter: blur(48px);
+  /* Note: backdrop-filter has minimal browser support */
+  border-radius: 8px;
 }
 
 button:hover {

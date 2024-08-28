@@ -34,6 +34,8 @@ function App() {
   const [transferTokenPrincipal, setTransferTokenPrincipal] = useState("");
   const [transferTokenTo, setTransferTokenTo] = useState("");
 
+  const [activeTab, setActiveTab] = useState<"stake" | "withdraw">("stake");
+
   async function handleConnect() {
     const authClient = await AuthClient.create();
 
@@ -279,41 +281,60 @@ function App() {
         token, $MINE.
       </p> */}
 
+      {/* log in with ICP */}
+      {identity === undefined && (
+        <button
+          className="orangeButton internetIdentity"
+          onClick={handleConnect}
+        >
+          Connect with Internet Identity
+        </button>
+      )}
+      {identity && <p>Logged in: {identity.getPrincipal().toString()}</p>}
+
       {/* staking card */}
       <div className="stakingCard">
-        {identity === undefined && (
-          <button className="orangeButton internetIdentity" onClick={handleConnect}>
-            Connect with Internet Identity
+        {/* tabs to toggle between staking and withdrawing */}
+        <div className="tabs">
+          <button className="tab" onClick={() => setActiveTab("stake")}>
+            Stake
           </button>
+          <button className="tab" onClick={() => setActiveTab("withdraw")}>
+            Withdraw
+          </button>
+        </div>
+
+        {/* amount to stake or withdraw */}
+        {activeTab === "stake" ? (
+          <div className="enterAmount">
+            <label htmlFor="stake">Enter amount to stake: &nbsp;</label>
+            <div className="enterAmountRow">
+              <input
+                id="stake"
+                alt="Stake"
+                type="number"
+                onChange={(e) => setStakeAmount(e.target.value)}
+              />
+              <button onClick={() => handleStake()}>Stake</button>
+            </div>
+          </div>
+        ) : (
+          <div className="enterAmount">
+            <label htmlFor="withdraw">Enter amount to withdraw: &nbsp;</label>
+            <div className="enterAmountRow">
+              <input
+                id="withdraw"
+                alt="Withdraw"
+                type="number"
+                onChange={(e) => setWithdrawAmount(e.target.value)}
+              />
+              <button onClick={() => handleWithdraw()}>Withdraw</button>
+            </div>
+          </div>
         )}
-        {identity && <p>Logged in: {identity.getPrincipal().toString()}</p>}
 
-        {/* amount to stake */}
-        <div>
-          <label htmlFor="stake">Enter amount to stake: &nbsp;</label>
-          <input
-            id="stake"
-            alt="Stake"
-            type="number"
-            onChange={(e) => setStakeAmount(e.target.value)}
-          />
-          <button onClick={() => handleStake()}>Stake</button>
-        </div>
+        <hr />
 
-        {/* amount to withdraw */}
-        <div>
-          <label htmlFor="withdraw">Enter amount to withdraw: &nbsp;</label>
-          <input
-            id="withdraw"
-            alt="Withdraw"
-            type="number"
-            onChange={(e) => setWithdrawAmount(e.target.value)}
-          />
-          <button onClick={() => handleWithdraw()}>Withdraw</button>
-        </div>
-
-        <button onClick={() => handleClaimRewards()}>Claim Rewards</button>
-        <br />
         <section id="metadata">
           {metadata && (
             <>
@@ -333,6 +354,8 @@ function App() {
             </>
           )}
         </section>
+
+        <button onClick={() => handleClaimRewards()}>Claim Rewards</button>
       </div>
     </main>
   );
