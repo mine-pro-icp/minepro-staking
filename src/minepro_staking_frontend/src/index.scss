@@ -1,13 +1,8 @@
 body {
   font-family: sans-serif;
-  font-size: 1.5rem;
-}
-
-img {
-  max-width: 50vw;
-  max-height: 25vw;
-  display: block;
-  margin: auto;
+  font-size: 1rem;
+  background-color: black;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 form {
@@ -26,6 +21,17 @@ button[type="submit"] {
   float: right;
 }
 
+h1 {
+  size: 2.5rem;
+  max-width: 700px;
+  text-align: center;
+}
+p {
+  size: 1rem;
+  max-width: 700px;
+  text-align: center;
+}
+
 #greeting {
   margin: 10px auto;
   padding: 10px 60px;
@@ -34,4 +40,158 @@ button[type="submit"] {
 
 #greeting:empty {
   display: none;
+}
+
+main {
+  overflow: hidden;
+  position: relative;
+  min-height: 100vh;
+  width: 100vw;
+
+  display: flex;
+  flex-direction: column;
+  // justify-content: center;
+  align-items: center;
+
+  padding: 6rem 0.25rem 1rem 0.25rem;
+}
+
+.homeBackground {
+  position: absolute;
+  width: 900px;
+  height: 1200px;
+  top: 0px;
+  right: -150px;
+  z-index: -10;
+
+  background-size: cover;
+  background-position: center;
+  background-image: url("/background-orb.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.mineproTag {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  // padding: 16px 24px;
+  gap: 8px;
+
+  background: rgba(254, 123, 30, 0.04);
+  box-shadow: inset 0px 4px 8px rgba(254, 123, 30, 0.32),
+    inset 0px -4px 8px rgba(254, 123, 30, 0.32);
+  backdrop-filter: blur(4px);
+  border-radius: 20px;
+
+  width: 160px;
+}
+
+.mineproTag img {
+  width: 20px;
+  height: 20px;
+}
+
+.mineproTag p {
+  font-size: 14px;
+}
+
+.grayTextGradient {
+  /* font-family: "Helvetica Neue"; */
+  font-style: normal;
+  font-weight: 500;
+  line-height: 120%;
+  /* or 86px */
+  text-transform: capitalize;
+
+  background: linear-gradient(
+    178.92deg,
+    #f7e9de 44.88%,
+    rgba(255, 255, 255, 0.2) 122.79%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.heroText {
+  text-align: left;
+  max-width: 700px;
+  size: 32px;
+}
+
+.stakingCard {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(242, 222, 247, 0.2);
+  backdrop-filter: blur(48px);
+  /* Note: backdrop-filter has minimal browser support */
+  border-radius: 40px;
+
+  padding: 16px 24px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.stakingCard::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  /* Adjust the height as needed */
+  background: radial-gradient(
+    circle at center,
+    rgba(214, 214, 214, 0.9) 0%,
+    rgba(255, 255, 255, 0) 20%,
+    rgba(255, 255, 255, 0) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+button:hover {
+  opacity: 80%;
+  transition: all 0.3s;
+}
+
+.internetIdentity {
+  margin: 0 auto 1rem auto;
+}
+
+.orangeButton {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 24px;
+  gap: 8px;
+  isolation: isolate;
+
+  background: #fe7b1e;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0px 4px 8px rgba(255, 255, 255, 0.32),
+    inset 0px -4px 8px rgba(255, 255, 255, 0.32);
+  border-radius: 20px;
+}
+
+.orangeButton:hover {
+  opacity: 80%;
+  transition: all 0.3s;
+}
+
+@media (max-width: 768px) {
+  .homeBackground {
+    top: 220px;
+    right: -300px;
+  }
+  h1 {
+    font-size: 2rem;
+  }
+  .orangeButton {
+    padding: 16px 8px;
+  }
 }
