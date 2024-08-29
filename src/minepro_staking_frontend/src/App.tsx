@@ -16,6 +16,8 @@ import {
   createActor as createTokenActor,
 } from "../declarations/icrc1_token/";
 import { _SERVICE as _ICRC1_TOKEN_SERVICE } from "../declarations/icrc1_token/token.did";
+import Navigation from "./components/Navigation";
+import Footer from "./components/Footer";
 
 interface UserInfo {
   balance: bigint;
@@ -35,8 +37,6 @@ function App() {
   const [transferTokenTo, setTransferTokenTo] = useState("");
 
   const [activeTab, setActiveTab] = useState<"stake" | "withdraw">("stake");
-
-  const year = new Date().getFullYear();
 
   async function handleConnect() {
     const authClient = await AuthClient.create();
@@ -260,290 +260,140 @@ function App() {
 
   return (
     <main>
-      <div className="homeBackground"></div>
-      {/* minpro tag - centered */}
-      <div className="mineproTag">
-        <img src="/logo-white.svg" alt="minepro logo" />
-        <p>MinePro</p>
+      <div className="flex justify-center w-full">
+        <Navigation
+          identity={identity && identity.getPrincipal().toString()}
+          loginCallback={handleConnect}
+        />
       </div>
 
-      {/* title */}
-      <h1 className="heroText grayTextGradient">Stake MinePro on ICP</h1>
-      {/* <h1
-        className={`sm:text-center lg:text-left grayTextGradient max-w-xl lg:max-w-[700px] text-[32px] sm:text-[48px] lg:text-[64px] 2xl:text-[80px]`}
-      >
-        Tokenized Bitcoin Mining For The People
-      </h1> */}
+      {/* main content */}
+      <div className="relative overflow-hidden flex flex-col items-center">
+        <div className="homeBackground"></div>
+        {/* top section - hero text and presale card */}
+        <section className="lg:mt-28 max-w-[1400px] mx-auto relative pt-10 pb-20">
+          {/* <div className="heroSectionBG"></div> top radial gradient */}
+          <div className="heroSectionBG2"></div> {/* grid lines */}
+          {/* content container */}
+          <div className="flex flex-col lg:flex-row justify-center px-8 lg:px-16 md:gap-6 2xl:gap-20 items-center">
+            {/* lefthand content - logo, title, description */}
 
-      {/* description */}
-      <p>Staking on MinePro ICP means you can ...</p>
-      {/* <p className="sm:text-center lg:text-left mt-5 max-w-[560px] text-white/60 text-[16px] sm:text-[18px] 2xl:text-[20px]">
-        MinePro is an innovative tokenized Bitcoin mining project which pays
-        investors 10-20% monthly profit in Bitcoin just for staking our native
-        token, $MINE.
-      </p> */}
+            <div className="w-full h-[360px] sm:h-[320px] lg:h-full relative flex items-center">
+              <div className="mr-4 lg:ml-4 xl:ml-8 lg:mr-0 mb-8 flex flex-col sm:items-center sm:w-full lg:w-auto lg:items-start">
+                {/* minpro tag - centered */}
+                <div className="mineproTag">
+                  <img src="/logo-white.svg" alt="minepro logo" />
+                  <p>MinePro</p>
+                </div>
+                {/* <MineProTag /> */}
+                <div className="mt-4 ">
+                  <h1
+                    className={`text-left sm:text-center lg:text-left grayTextGradient max-w-xl lg:max-w-[500px] text-[32px] sm:text-[48px] lg:text-[64px] 2xl:text-[80px]`}
+                  >
+                    Stake MinePro on ICP
+                  </h1>
+                  <p className="text-left sm:text-center lg:text-left mt-5 max-w-[400px] text-white/60 text-[16px] sm:text-[18px] 2xl:text-[20px]">
+                    MinePro is an innovative tokenized Bitcoin mining project
+                    which pays investors 10-20% monthly profit in Bitcoin just
+                    for staking our native token, $MINE.
+                  </p>
+                </div>
+              </div>
+              {/* <div className="absolute inset-0">
+            </div> */}
+            </div>
 
-      {/* log in with ICP */}
-      {identity === undefined && (
-        <button
-          className="orangeButton internetIdentity"
-          onClick={handleConnect}
-        >
-          Connect with Internet Identity
-        </button>
-      )}
-      {identity && <p>Logged in: {identity.getPrincipal().toString()}</p>}
+            {/* righthand content - presale card */}
+            <div className="lg:mr-4 flex justify-center relative">
+              {/* <div className="publicSaleSectionBG sm:top-[120px]"></div> */}
+              <div className="">
+                <div className="glassCard">
+                  {/* tabs to toggle between staking and withdrawing */}
+                  <div className="tabs">
+                    <button
+                      className="tab"
+                      onClick={() => setActiveTab("stake")}
+                    >
+                      Stake
+                    </button>
+                    <button
+                      className="tab"
+                      onClick={() => setActiveTab("withdraw")}
+                    >
+                      Withdraw
+                    </button>
+                  </div>
 
-      {/* staking card */}
-      <div className="stakingCard">
-        {/* tabs to toggle between staking and withdrawing */}
-        <div className="tabs">
-          <button className="tab" onClick={() => setActiveTab("stake")}>
-            Stake
-          </button>
-          <button className="tab" onClick={() => setActiveTab("withdraw")}>
-            Withdraw
-          </button>
-        </div>
+                  {/* amount to stake or withdraw */}
+                  {activeTab === "stake" ? (
+                    <div className="enterAmount">
+                      <label htmlFor="stake">
+                        Enter amount to stake: &nbsp;
+                      </label>
+                      <div className="enterAmountRow">
+                        <input
+                          id="stake"
+                          alt="Stake"
+                          type="number"
+                          onChange={(e) => setStakeAmount(e.target.value)}
+                        />
+                        <button onClick={() => handleStake()}>Stake</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="enterAmount">
+                      <label htmlFor="withdraw">
+                        Enter amount to withdraw: &nbsp;
+                      </label>
+                      <div className="enterAmountRow">
+                        <input
+                          id="withdraw"
+                          alt="Withdraw"
+                          type="number"
+                          onChange={(e) => setWithdrawAmount(e.target.value)}
+                        />
+                        <button onClick={() => handleWithdraw()}>
+                          Withdraw
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
-        {/* amount to stake or withdraw */}
-        {activeTab === "stake" ? (
-          <div className="enterAmount">
-            <label htmlFor="stake">Enter amount to stake: &nbsp;</label>
-            <div className="enterAmountRow">
-              <input
-                id="stake"
-                alt="Stake"
-                type="number"
-                onChange={(e) => setStakeAmount(e.target.value)}
-              />
-              <button onClick={() => handleStake()}>Stake</button>
+                  <hr />
+
+                  <section id="metadata">
+                    {metadata && (
+                      <>
+                        <p>Stake Token: {metadata.token.toString()}</p>
+                        <p>Reward Token: {metadata.reward.toString()}</p>
+                        <p>Lock Time: {metadata.lock_time.toString()}</p>
+                        <p>
+                          Leave Early Fee: {metadata.leave_early_fee.toString()}
+                        </p>
+                      </>
+                    )}
+                  </section>
+
+                  <section id="userinfo">
+                    {userInfo && (
+                      <>
+                        <p>Staked Amount: {userInfo.balance.toString()}</p>
+                        <p>Rewards to claim: {userInfo.reward.toString()}</p>
+                      </>
+                    )}
+                  </section>
+
+                  <button className="tab" onClick={() => handleClaimRewards()}>
+                    Claim Rewards
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        ) : (
-          <div className="enterAmount">
-            <label htmlFor="withdraw">Enter amount to withdraw: &nbsp;</label>
-            <div className="enterAmountRow">
-              <input
-                id="withdraw"
-                alt="Withdraw"
-                type="number"
-                onChange={(e) => setWithdrawAmount(e.target.value)}
-              />
-              <button onClick={() => handleWithdraw()}>Withdraw</button>
-            </div>
-          </div>
-        )}
-
-        <hr />
-
-        <section id="metadata">
-          {metadata && (
-            <>
-              <p>Stake Token: {metadata.token.toString()}</p>
-              <p>Reward Token: {metadata.reward.toString()}</p>
-              <p>Lock Time: {metadata.lock_time.toString()}</p>
-              <p>Leave Early Fee: {metadata.leave_early_fee.toString()}</p>
-            </>
-          )}
         </section>
-
-        <section id="userinfo">
-          {userInfo && (
-            <>
-              <p>Staked Amount: {userInfo.balance.toString()}</p>
-              <p>Rewards to claim: {userInfo.reward.toString()}</p>
-            </>
-          )}
-        </section>
-
-        <button onClick={() => handleClaimRewards()}>Claim Rewards</button>
       </div>
 
-      {/* footer */}
-      <footer>
-        {/* top section */}
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 justify-between px-4 sm:px-12 lg:px-20 pt-[112px] pb-14">
-          {/* left col - logo and about */}
-          <div className="">
-            {/* logo */}
-            <div className="flex items-center gap-3">
-              <img src="/logo-white.svg" alt="logo" width={36.24} height={38} />
-              <p className="font-bold text-[26px] leading-8">MinePro</p>
-            </div>
-            {/* about */}
-            <p className="text-[14px] leading-6 mt-4 max-w-[358px] text-white/60">
-              No information stated on this web page or elsewhere by MinePro is
-              to be misconstrued as financial advice. It is recommended to
-              consult with a professional investment advisor before investing in
-              any opportunity.
-            </p>
-          </div>
-          {/* quick links */}
-          <div className="flex flex-col gap-4">
-            <p className="text-[20px] font-bold leading-8">Quick Links</p>
-            <a
-              href="https://discord.gg/dWtWJjwNYy"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[14px] font-semibold leading-6 text-white/60 hover:text-white transition-all duration-200"
-            >
-              Discord
-            </a>
-            <a
-              href="https://twitter.com/MineProBusiness"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[14px] font-semibold leading-6 text-white/60 hover:text-white transition-all duration-200"
-            >
-              X/Twitter
-            </a>
-            <a
-              href="https://minepro.gitbook.io/minepro-legal-documentation/"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[14px] font-semibold leading-6 text-white/60 hover:text-white transition-all duration-200"
-            >
-              Legal
-            </a>
-            <a
-              href="https://minepro-1.gitbook.io/minepro-documentation"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[14px] font-semibold leading-6 text-white/60 hover:text-white transition-all duration-200"
-            >
-              Docs
-            </a>
-            {/* <a
-            href="https://presale.mineprobusiness.net/"
-            target="_blank"
-            rel="noreferrer"
-            className="text-[14px] font-semibold leading-6 text-white/60 hover:text-white transition-all duration-200"
-          >
-            Join Live Presale
-          </a> */}
-          </div>
-          {/* company links */}
-          <div className="flex flex-col gap-4">
-            <p className="text-[20px] font-bold leading-8">Company</p>
-            <a
-              href="https://minepro-1.gitbook.io/minepro-documentation"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[14px] font-semibold leading-6 text-white/60 hover:text-white transition-all duration-200"
-            >
-              About us
-            </a>
-            <a
-              href="https://minepro.gitbook.io/minepro-legal-documentation/disclaimer"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[14px] font-semibold leading-6 text-white/60 hover:text-white transition-all duration-200"
-            >
-              Disclaimer
-            </a>
-            <a
-              href="https://minepro.gitbook.io/minepro-legal-documentation/privacy-policy"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[14px] font-semibold leading-6 text-white/60 hover:text-white transition-all duration-200"
-            >
-              Privacy Policy
-            </a>
-            <a
-              href="https://minepro.gitbook.io/minepro-legal-documentation/terms-and-conditions"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[14px] font-semibold leading-6 text-white/60 hover:text-white transition-all duration-200"
-            >
-              Terms & Conditions
-            </a>
-          </div>
-          {/* socials */}
-          <div className="flex flex-col gap-4">
-            <p className="text-[20px] font-bold leading-8">Join us</p>
-            <div className="flex items-center gap-4">
-              {/* discord */}
-              <div className="glassButtonContainer">
-                <a
-                  href="https://discord.gg/dWtWJjwNYy"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="glassButton" /* text-[14px] font-semibold leading-6  */
-                >
-                  <img
-                    src="/icons/socials/discord.svg"
-                    alt="discord icon"
-                    width={32}
-                    height={32}
-                    className="mt-2"
-                  />
-                </a>
-              </div>
-
-              {/* gitbook */}
-              <div className="glassButtonContainer">
-                <a
-                  href="https://minepro-1.gitbook.io/minepro-documentation"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="glassButton"
-                >
-                  <img
-                    src="/icons/socials/gitbook.svg"
-                    alt="gitbook icon"
-                    width={32}
-                    height={32}
-                    className="mt-2"
-                  />
-                </a>
-              </div>
-
-              {/* twitter */}
-              <div className="glassButtonContainer">
-                <a
-                  href="https://twitter.com/MineProBusiness"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="glassButton"
-                >
-                  <img
-                    src="/icons/socials/twitter.svg"
-                    alt="x icon"
-                    width={24}
-                    height={24}
-                    className="mt-2"
-                  />
-                </a>
-              </div>
-
-              {/* telegram */}
-              <div className="glassButtonContainer">
-                <a
-                  href="https://t.me/MineProBitcoin"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="glassButton"
-                >
-                  <img
-                    src="/icons/socials/telegram.svg"
-                    alt="x icon"
-                    width={24}
-                    height={24}
-                    className="mt-2"
-                  />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* bottom section */}
-        <div className="h-[75px] flex justify-center items-center px-4 sm:px-20">
-          <p className="text-[16px] leading-6 text-white/60">
-            © {year} MinePro | All rights reserved
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }
