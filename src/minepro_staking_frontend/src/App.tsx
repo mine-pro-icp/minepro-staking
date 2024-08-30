@@ -18,6 +18,84 @@ import {
 import { _SERVICE as _ICRC1_TOKEN_SERVICE } from "../declarations/icrc1_token/token.did";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
+import UserInfo from "./components/UserInfo";
+import UnlockTime from "./components/UnlockTime";
+import { Toaster, toast } from "sonner";
+import Approve from "./components/helpers/Approve";
+
+type StakingListItem = {
+  shortName: string;
+  apy: string;
+  pool: Contract;
+  token: Contract;
+  name: string;
+  reward: string;
+  depositFunction: string;
+  poolImg: StaticImageData;
+  primaryBtn?: Button;
+  secondaryBtn?: Button;
+  showClaimBtn: boolean;
+  pendingRewardsFunction?: string;
+  hasUnlockTime: boolean;
+  unlockTimeFunction?: string;
+  lockTimeFunction?: string;
+  isYieldFarm: boolean;
+};
+
+const stakingListItem: StakingListItem = {
+  shortName: "MINE",
+  apy: "10-20%",
+  pool: minepro_staking_backend,
+  token: defaultTokenClient,
+  name: "MINE",
+  reward: "BNB",
+  depositFunction: "stake",
+  poolImg: "/minepro.png",
+  showClaimBtn: true,
+  hasUnlockTime: true,
+  isYieldFarm: false,
+};
+
+const rewardTokenName = "$MINE";
+const tabs = ["Deposit", "Withdraw"];
+
+interface Period {
+  period: string;
+  multiplier: number;
+  earlyUnstakeFee: number;
+}
+const periods: Period[] = [
+  {
+    period: "30 Days",
+    multiplier: 1,
+    earlyUnstakeFee: 0.1,
+  },
+  {
+    period: "90 Days",
+    multiplier: 2,
+    earlyUnstakeFee: 0.15,
+  },
+  {
+    period: "180 Days",
+    multiplier: 5,
+    earlyUnstakeFee: 0.2,
+  },
+  {
+    period: "1 Year",
+    multiplier: 10,
+    earlyUnstakeFee: 0.3,
+  },
+  {
+    period: "2 Years",
+    multiplier: 20,
+    earlyUnstakeFee: 0.5,
+  },
+  {
+    period: "5 Years",
+    multiplier: 50,
+    earlyUnstakeFee: 0.7,
+  },
+];
 
 interface UserInfo {
   balance: bigint;
@@ -36,7 +114,14 @@ function App() {
   const [transferTokenPrincipal, setTransferTokenPrincipal] = useState("");
   const [transferTokenTo, setTransferTokenTo] = useState("");
 
+  const [tokenBalance, setTokenBalance] = useState<string>("0");
+  const [pendingRewards, setPendingRewards] = useState<string>("0");
+  const [insufficientAllowance, setInsufficentAllowance] =
+    useState<boolean>(false);
+
   const [activeTab, setActiveTab] = useState<"stake" | "withdraw">("stake");
+  const [secsToUnlock, setSecsToUnlock] = useState<number>(0);
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>(periods[0]);
 
   async function handleConnect() {
     const authClient = await AuthClient.create();
@@ -114,8 +199,6 @@ function App() {
     if (metadata === undefined) {
       return;
     }
-
-    console.log("BLAHHH");
 
     const amount = BigInt(stakeAmount);
 
@@ -258,8 +341,27 @@ function App() {
     fetchUserInfo();
   }, [identity]);
 
+  // useEffect(() => {
+  //   if (timeLeft !== undefined && timeLeft !== null) {
+  //     setSecsToUnlock(Number(timeLeft.toString()));
+  //   }
+  //   queryClient.invalidateQueries({ queryKey: timeLeftquery });
+  // }, [blockNumber]);
+
+  const earlyWithdrawText = (): string => {
+    if (secsToUnlock == undefined || secsToUnlock == null) {
+      return "Checking Lock Time";
+    }
+    return secsToUnlock > 0 ? "Early Withdraw (15% Fee)" : "Withdraw";
+  };
+
+  const maxDeposit = () => {
+    setStakeAmount(tokenBalance);
+  };
+
   return (
     <main>
+      <Toaster />
       <div className="flex justify-center w-full">
         <Navigation
           identity={identity && identity.getPrincipal().toString()}
@@ -306,10 +408,11 @@ function App() {
             {/* righthand content - presale card */}
             <div className="lg:mr-4 flex justify-center relative">
               {/* <div className="publicSaleSectionBG sm:top-[120px]"></div> */}
-              <div className="">
-                <div className="glassCard">
-                  {/* tabs to toggle between staking and withdrawing */}
-                  <div className="tabs">
+
+              <div className="glassCard p-4">
+                <div className="flex flex-col justify-center w-full max-w-2xl mx-auto  rounded-2xl px-8 pt-8 pb-4">
+                  {/* tabs */}
+                  <div className="mx-auto mb-4 tabs grid w-full grid-cols-2">
                     <button
                       className="tab"
                       onClick={() => setActiveTab("stake")}
@@ -323,8 +426,288 @@ function App() {
                       Withdraw
                     </button>
                   </div>
+                </div>
 
-                  {/* amount to stake or withdraw */}
+                {/* user info grid */}
+                <UserInfo
+                  stakedBalance={"100"}
+                  totalStaked={"100"}
+                  tokenBalance={"100"}
+                  totalBNBRewards={"100"}
+                  tokenName={"100"}
+                  // stakedBalance={stakedBalance}
+                  // totalStaked={totalStaked}
+                  // tokenBalance={tokenBalance}
+                  // totalBNBRewards={bnbRewards}
+                  // tokenName={stakingListItem.reward}
+                />
+
+                {/* deposit/withdrawal component */}
+                <div className="my-4">
+                  {activeTab === "stake" && (
+                    // <Deposit
+                    //   tokenBalance={tokenBalance}
+                    //   stakingListItem={stakingListItem}
+                    //   pendingRewards={pendingRewards}
+                    //   rewardTokenName={selectedToken?.name}
+                    // />
+                    <>
+                      <p className="">Select period to stake: </p>
+                      <select name="" id="" className="">
+                        {periods.map((period) => (
+                          <option
+                            key={period.period}
+                            value={period.period}
+                            onClick={() => setSelectedPeriod(period)}
+                          >
+                            {period.period}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="grid grid-flow-row gap-2">
+                        <div className="grid grid-cols-1 gap-2">
+                          <div className="col-span-1">
+                            <label className="label">
+                              <span className="text-sm">
+                                Balance:{" "}
+                                {parseFloat(
+                                  tokenBalance?.toString()
+                                ).toLocaleString([], {
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 2,
+                                })}
+                                {stakingListItem.isYieldFarm &&
+                                  parseFloat(tokenBalance?.toString()) <= 0 && (
+                                    <a
+                                      href={
+                                        "https://pancakeswap.finance/v2/add/BNB/0xf82007D28B8D0EaFC6Fde42eCb697A74824D839E"
+                                      }
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="ml-2 text-xs text-red-400 underline"
+                                    >
+                                      Get LP Tokens
+                                    </a>
+                                  )}
+                              </span>
+                              {stakingListItem.hasUnlockTime && (
+                                <span className="label-text-alt">
+                                  {/* <LockTime 
+                  stakingListItem={stakingListItem}
+                  chain={chain}
+                /> */}
+                                </span>
+                              )}
+                            </label>
+                            <div className="mt-2 relative rounded-sm shadow-sm">
+                              <div className="absolute inset-y-0 left-2 gap-3 flex items-center">
+                                <img
+                                  src={stakingListItem.poolImg}
+                                  height={25}
+                                  width={25}
+                                  alt="token icon"
+                                />
+                              </div>
+                              <input
+                                id="stake"
+                                alt="Stake"
+                                type="number"
+                                className="input input-bordered w-full pl-14"
+                                value={stakeAmount}
+                                // onChange={handleChangeAmount}
+                                onChange={(e) => setStakeAmount(e.target.value)}
+                                placeholder="Deposit"
+                              />
+                              <div className="absolute inset-y-0 right-0 flex items-center">
+                                <div
+                                  className="badge badge-primary py-2 rounded-sm mr-4 cursor-pointer text-sm"
+                                  onClick={maxDeposit}
+                                >
+                                  MAX
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-span-1">
+                            {insufficientAllowance ? (
+                              <Approve
+                                token={stakingListItem.token[56]}
+                                spender={stakingListItem.pool[56]}
+                              />
+                            ) : (
+                              <div className="flex flex-col w-full gap-2 mt-2 sm:flex-row justify-evenly items-center">
+                                <button
+                                  className={`tab w-full bg-[#17181c]`}
+                                  onClick={() => handleStake()}
+                                  // onClick={() =>
+                                  //   depositCall({
+                                  //     abi: stakingListItem.pool.abi,
+                                  //     address:
+                                  //       stakingListItem.pool[56]?.address ||
+                                  //       zeroAddress,
+                                  //     functionName:
+                                  //       stakingListItem.depositFunction,
+                                  //     args: [parseEther(amount || "0")],
+                                  //   })
+                                  // }
+                                  //disabled={!depositCall}
+                                >
+                                  Deposit
+                                </button>
+                                <button
+                                  className={`tab w-full bg-[#17181c]`}
+                                  onClick={() => handleClaimRewards()}
+                                  // onClick={() =>
+                                  //   claimCall({
+                                  //     abi: stakingListItem.pool.abi,
+                                  //     address:
+                                  //       stakingListItem.pool[56]?.address ||
+                                  //       zeroAddress,
+                                  //     functionName: "claimRewards",
+                                  //     args: [BigInt(1)],
+                                  //   })
+                                  // }
+                                  //disabled={!claimCall}
+                                >
+                                  Claim{" "}
+                                  {parseFloat(pendingRewards || "0").toFixed(3)}{" "}
+                                  {rewardTokenName}
+                                </button>
+                                {/* <button
+                className={`btn btn-block bg-[#17181c] btn-primary mb-2 mt-1 ${
+                  depositFetchStatus === "fetching" ? "loading" : ""
+                }`}
+                onClick={() =>
+                  depositCall({
+                    abi: stakingListItem.pool.abi,
+                    address: stakingListItem.pool[56]?.address || zeroAddress,
+                    functionName: stakingListItem.depositFunction,
+                    args: [parseEther(amount || "0")],
+                  })
+                }
+                disabled={!depositCall}
+              >
+                Deposit
+              </button> */}
+                                {/* <button
+                className={`btn btn-block bg-[#17181c] btn-primary ${
+                  claimFetchStatus === "fetching" ? "loading" : ""
+                }`}
+                onClick={() =>
+                  claimCall({
+                    abi: stakingListItem.pool.abi,
+                    address: stakingListItem.pool[56]?.address || zeroAddress,
+                    functionName: "claimRewards",
+                    args: [BigInt(1)],
+                  })
+                }
+                disabled={!claimCall}
+              >
+                Claim {parseFloat(pendingRewards || "0").toFixed(3)}{" "}
+                {rewardTokenName}
+              </button> */}
+                              </div>
+                            )}
+                          </div>
+                          <div className="mt-4 w-full flex justify-center">
+                            <p>Withdraw Timer Resets With Each Deposit</p>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {activeTab === "withdraw" && (
+                    // <Withdraw
+                    //   withdrawableBalance={stakedBalance}
+                    //   stakingListItem={stakingListItem}
+                    // />
+                    <div className="grid grid-flow-row gap-2">
+                      <div className="grid grid-cols-1 gap-2">
+                        <div className="col-span-1">
+                          <label className="label">
+                            <div></div>
+                            {stakingListItem.hasUnlockTime && (
+                              <span className="label-text-alt">
+                                <UnlockTime secsToUnlock={secsToUnlock} />
+                              </span>
+                            )}
+                          </label>
+
+                          <div className="col-span-1">
+                            <label className="label">
+                              {/* <span className="label-text">
+                                Balance:{" "}
+                                {parseFloat(
+                                  withdrawableBalance || "0"
+                                ).toLocaleString([], {
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 2,
+                                })}
+                              </span> */}
+                              {stakingListItem.hasUnlockTime && (
+                                <span className="label-text-alt">
+                                  {/* <LockTime 
+                  stakingListItem={stakingListItem}
+                  chain={chain}
+                /> */}
+                                </span>
+                              )}
+                            </label>
+                            <div className="relative rounded-sm shadow-sm">
+                              <div className="absolute inset-y-0 ml-3 flex items-center">
+                                <img
+                                  src={stakingListItem.poolImg}
+                                  height={25}
+                                  width={25}
+                                  alt={stakingListItem.name}
+                                />
+                              </div>
+                              <input
+                                value={withdrawAmount}
+                                //onChange={handleChangeAmount}
+                                onChange={(e) =>
+                                  setWithdrawAmount(e.target.value)
+                                }
+                                className="input input-bordered w-full pl-14"
+                                placeholder="Withdraw"
+                              />
+                              <div className="absolute inset-y-0 right-0 flex items-center">
+                                <div
+                                  className="badge badge-primary py-2 rounded-sm mr-4 cursor-pointer text-sm"
+                                  onClick={maxDeposit}
+                                >
+                                  MAX
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-span-1">
+                          <button
+                            className={`tab w-full bg-[#17181c]`}
+                            onClick={() => handleWithdraw()}
+                            // onClick={() =>
+                            //   withdrawCall({
+                            //     abi: stakingListItem.pool.abi,
+                            //     address:
+                            //       stakingListItem.pool[56]?.address ||
+                            //       zeroAddress,
+                            //     functionName: "withdraw",
+                            //     args: [parseEther(amount || "0")],
+                            //   })
+                            // }
+                          >
+                            {earlyWithdrawText()}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* amount to stake or withdraw 
                   {activeTab === "stake" ? (
                     <div className="enterAmount">
                       <label htmlFor="stake">
@@ -361,38 +744,42 @@ function App() {
 
                   <hr />
 
-                  <section id="metadata">
-                    {metadata && (
-                      <>
-                        <p>Stake Token: {metadata.token.toString()}</p>
-                        <p>Reward Token: {metadata.reward.toString()}</p>
-                        <p>Lock Time: {metadata.lock_time.toString()}</p>
-                        <p>
-                          Leave Early Fee: {metadata.leave_early_fee.toString()}
-                        </p>
-                      </>
-                    )}
-                  </section>
-
-                  <section id="userinfo">
-                    {userInfo && (
-                      <>
-                        <p>Staked Amount: {userInfo.balance.toString()}</p>
-                        <p>Rewards to claim: {userInfo.reward.toString()}</p>
-                      </>
-                    )}
-                  </section>
-
-                  <button className="tab" onClick={() => handleClaimRewards()}>
-                    Claim Rewards
-                  </button>
+                  
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </section>
       </div>
 
+      {/* GIANGS METADATA CODE */}
+      <section className="bg-red-300 text-black ">
+        <h4>DEV:</h4>
+        <section id="metadata">
+          {metadata && (
+            <>
+              <p>Stake Token: {metadata.token.toString()}</p>
+              <p>Reward Token: {metadata.reward.toString()}</p>
+              <p>Lock Time: {metadata.lock_time.toString()}</p>
+              <p>Leave Early Fee: {metadata.leave_early_fee.toString()}</p>
+            </>
+          )}
+        </section>
+
+        <section id="userinfo">
+          {userInfo && (
+            <>
+              <p>Staked Amount: {userInfo.balance.toString()}</p>
+              <p>Rewards to claim: {userInfo.reward.toString()}</p>
+            </>
+          )}
+        </section>
+
+        <button className="tab" onClick={() => handleClaimRewards()}>
+          Claim Rewards
+        </button>
+      </section>
+       
       <Footer />
     </main>
   );
