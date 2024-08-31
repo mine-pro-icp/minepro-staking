@@ -15,13 +15,13 @@ interface NavigationProps {
 }
 
 const Navigation = ({ identity, loginCallback }: NavigationProps) => {
-  const scrollToSection = (section: string) => {
-    const el = document.getElementById(section);
-    console.log(section);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  //   const scrollToSection = (section: string) => {
+  //     const el = document.getElementById(section);
+  //     console.log(section);
+  //     if (el) {
+  //       el.scrollIntoView({ behavior: "smooth" });
+  //     }
+  //   };
   const [navbar, setNavbar] = useState(false);
 
   return (
@@ -105,13 +105,16 @@ const Navigation = ({ identity, loginCallback }: NavigationProps) => {
       {/* links */}
       <div className="hidden lg:flex justify-self-center items-center gap-8 transition-all duration-200">
         {navlink.map((link, index) => (
-          <button
-            onClick={() => scrollToSection(link.link)}
+          <a
+            //onClick={() => scrollToSection(link.link)}
             key={index}
+            href={link.link}
+            target="_blank"
+            rel="noreferrer"
             className="text-white/40 capitalize hover:text-white text-xs 2xl:text-base text-nowrap"
           >
             {link.title}
-          </button>
+          </a>
         ))}
         <a
           href="https://minepro-1.gitbook.io/minepro-documentation"

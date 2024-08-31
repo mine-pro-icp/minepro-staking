@@ -409,18 +409,22 @@ function App() {
             <div className="lg:mr-4 flex justify-center relative">
               {/* <div className="publicSaleSectionBG sm:top-[120px]"></div> */}
 
-              <div className="glassCard p-4">
-                <div className="flex flex-col justify-center w-full max-w-2xl mx-auto  rounded-2xl px-8 pt-8 pb-4">
+              <div className="glassCard p-4 min-h-[540px] flex flex-col">
+                <div className="flex flex-col justify-center w-full max-w-2xl mx-auto  rounded-2xl px-8">
                   {/* tabs */}
                   <div className="mx-auto mb-4 tabs grid w-full grid-cols-2">
                     <button
-                      className="tab"
+                      className={`tab ${
+                        activeTab === "stake" ? "text-white" : ""
+                      }`}
                       onClick={() => setActiveTab("stake")}
                     >
                       Stake
                     </button>
                     <button
-                      className="tab"
+                      className={`tab ${
+                        activeTab === "withdraw" ? "text-white" : ""
+                      }`}
                       onClick={() => setActiveTab("withdraw")}
                     >
                       Withdraw
@@ -443,7 +447,7 @@ function App() {
                 />
 
                 {/* deposit/withdrawal component */}
-                <div className="my-4">
+                <div className="mb-4 mt-auto">
                   {activeTab === "stake" && (
                     // <Deposit
                     //   tokenBalance={tokenBalance}
@@ -452,8 +456,12 @@ function App() {
                     //   rewardTokenName={selectedToken?.name}
                     // />
                     <>
-                      <p className="">Select period to stake: </p>
-                      <select name="" id="" className="">
+                      <p className="mt-4 text-left">Select period to stake: </p>
+                      <select
+                        name=""
+                        id=""
+                        className="mt-1 border border-white/50 rounded-lg bg-transparent w-full p-2"
+                      >
                         {periods.map((period) => (
                           <option
                             key={period.period}
@@ -464,7 +472,7 @@ function App() {
                           </option>
                         ))}
                       </select>
-                      <div className="grid grid-flow-row gap-2">
+                      <div className="mt-4 grid grid-flow-row gap-2">
                         <div className="grid grid-cols-1 gap-2">
                           <div className="col-span-1">
                             <label className="label">
@@ -499,24 +507,24 @@ function App() {
                                 </span>
                               )}
                             </label>
-                            <div className="mt-2 relative rounded-sm shadow-sm">
-                              <div className="absolute inset-y-0 left-2 gap-3 flex items-center">
+                            <div className="relative rounded-sm shadow-sm">
+                              {/* <div className="absolute inset-y-0 left-2 gap-3 flex items-center">
                                 <img
                                   src={stakingListItem.poolImg}
                                   height={25}
                                   width={25}
                                   alt="token icon"
                                 />
-                              </div>
+                              </div> */}
                               <input
                                 id="stake"
                                 alt="Stake"
                                 type="number"
-                                className="input input-bordered w-full pl-14"
+                                className="input input-bordered w-full"
                                 value={stakeAmount}
                                 // onChange={handleChangeAmount}
                                 onChange={(e) => setStakeAmount(e.target.value)}
-                                placeholder="Deposit"
+                                placeholder="Enter amount..."
                               />
                               <div className="absolute inset-y-0 right-0 flex items-center">
                                 <div
@@ -537,7 +545,7 @@ function App() {
                             ) : (
                               <div className="flex flex-col w-full gap-2 mt-2 sm:flex-row justify-evenly items-center">
                                 <button
-                                  className={`tab w-full bg-[#17181c]`}
+                                  className={`orangeButton w-full bg-[#17181c]`}
                                   onClick={() => handleStake()}
                                   // onClick={() =>
                                   //   depositCall({
@@ -554,25 +562,7 @@ function App() {
                                 >
                                   Deposit
                                 </button>
-                                <button
-                                  className={`tab w-full bg-[#17181c]`}
-                                  onClick={() => handleClaimRewards()}
-                                  // onClick={() =>
-                                  //   claimCall({
-                                  //     abi: stakingListItem.pool.abi,
-                                  //     address:
-                                  //       stakingListItem.pool[56]?.address ||
-                                  //       zeroAddress,
-                                  //     functionName: "claimRewards",
-                                  //     args: [BigInt(1)],
-                                  //   })
-                                  // }
-                                  //disabled={!claimCall}
-                                >
-                                  Claim{" "}
-                                  {parseFloat(pendingRewards || "0").toFixed(3)}{" "}
-                                  {rewardTokenName}
-                                </button>
+
                                 {/* <button
                 className={`btn btn-block bg-[#17181c] btn-primary mb-2 mt-1 ${
                   depositFetchStatus === "fetching" ? "loading" : ""
@@ -610,7 +600,9 @@ function App() {
                             )}
                           </div>
                           <div className="mt-4 w-full flex justify-center">
-                            <p>Withdraw Timer Resets With Each Deposit</p>
+                            <p className="italic max-w-[240px]">
+                              Withdraw Timer Resets With Each Deposit
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -633,7 +625,7 @@ function App() {
                             )}
                           </label>
 
-                          <div className="col-span-1">
+                          <div className="mt-1 col-span-1">
                             <label className="label">
                               {/* <span className="label-text">
                                 Balance:{" "}
@@ -654,22 +646,22 @@ function App() {
                               )}
                             </label>
                             <div className="relative rounded-sm shadow-sm">
-                              <div className="absolute inset-y-0 ml-3 flex items-center">
+                              {/* <div className="absolute inset-y-0 ml-3 flex items-center">
                                 <img
                                   src={stakingListItem.poolImg}
                                   height={25}
                                   width={25}
                                   alt={stakingListItem.name}
                                 />
-                              </div>
+                              </div> */}
                               <input
                                 value={withdrawAmount}
                                 //onChange={handleChangeAmount}
                                 onChange={(e) =>
                                   setWithdrawAmount(e.target.value)
                                 }
-                                className="input input-bordered w-full pl-14"
-                                placeholder="Withdraw"
+                                className="input input-bordered w-full"
+                                placeholder="Enter amount..."
                               />
                               <div className="absolute inset-y-0 right-0 flex items-center">
                                 <div
@@ -684,7 +676,7 @@ function App() {
                         </div>
                         <div className="col-span-1">
                           <button
-                            className={`tab w-full bg-[#17181c]`}
+                            className={`mt-4 orangeButton w-full bg-[#17181c]`}
                             onClick={() => handleWithdraw()}
                             // onClick={() =>
                             //   withdrawCall({
@@ -704,6 +696,36 @@ function App() {
                     </div>
                   )}
                 </div>
+                {/* claim rewards button */}
+                {pendingRewards && (
+                  <div className="mt-4">
+                    <p className="text-left mb-1">Claim Rewards: </p>
+                    {parseFloat(pendingRewards) > 0 ? (
+                      <button
+                        className={`orangeButton w-full bg-[#17181c]`}
+                        onClick={() => handleClaimRewards()}
+                        // onClick={() =>
+                        //   claimCall({
+                        //     abi: stakingListItem.pool.abi,
+                        //     address:
+                        //       stakingListItem.pool[56]?.address ||
+                        //       zeroAddress,
+                        //     functionName: "claimRewards",
+                        //     args: [BigInt(1)],
+                        //   })
+                        // }
+                        //disabled={!claimCall}
+                      >
+                        Claim {parseFloat(pendingRewards || "0").toFixed(3)}{" "}
+                        {rewardTokenName}
+                      </button>
+                    ) : (
+                      <p className="text-left text-[14px]">
+                        You have no rewards to claim at this time.{" "}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -779,7 +801,7 @@ function App() {
           Claim Rewards
         </button>
       </section>
-       
+
       <Footer />
     </main>
   );
