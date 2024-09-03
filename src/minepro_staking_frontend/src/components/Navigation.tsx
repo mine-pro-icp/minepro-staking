@@ -59,7 +59,7 @@ const Navigation = ({ identity, loginCallback }: NavigationProps) => {
       </button>
 
       <div
-        className={`bg-black rounded-2xl z-50 absolute md:hidden left-0 w-full top-[88px] transition-all duration-200 ${
+        className={`bg-black rounded-2xl z-50 absolute lg:hidden left-0 w-full top-[88px] transition-all duration-200 ${
           navbar ? "flex flex-col" : "hidden"
         }`}
       >

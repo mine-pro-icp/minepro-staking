@@ -56,8 +56,9 @@ const stakingListItem: StakingListItem = {
   isYieldFarm: false,
 };
 
-const rewardTokenName = "$MINE";
-const tabs = ["Deposit", "Withdraw"];
+const stakedAssetName = "$MINE";
+const rewardTokenName = "BTC";
+const tabs = ["Deposit", "Withdraw", "Transfer"];
 
 interface Period {
   period: string;
@@ -97,6 +98,22 @@ const periods: Period[] = [
   },
 ];
 
+interface Token {
+  name: string;
+  address: string;
+}
+
+const tokens: Token[] = [
+  {
+    name: "MINE",
+    address: "0xf82007D28B8D0EaFC6Fde42eCb697A74824D839E",
+  },
+  {
+    name: "BNB",
+    address: "0x......",
+  },
+];
+
 interface UserInfo {
   balance: bigint;
   reward: bigint;
@@ -113,13 +130,16 @@ function App() {
   const [transferAmount, setTransferAmount] = useState("");
   const [transferTokenPrincipal, setTransferTokenPrincipal] = useState("");
   const [transferTokenTo, setTransferTokenTo] = useState("");
+  const [transferTokenToValid, setTransferTokenToValid] = useState(false);
 
   const [tokenBalance, setTokenBalance] = useState<string>("0");
   const [pendingRewards, setPendingRewards] = useState<string>("0");
   const [insufficientAllowance, setInsufficentAllowance] =
     useState<boolean>(false);
 
-  const [activeTab, setActiveTab] = useState<"stake" | "withdraw">("stake");
+  const [activeTab, setActiveTab] = useState<
+    "deposit" | "withdraw" | "transfer"
+  >("deposit");
   const [secsToUnlock, setSecsToUnlock] = useState<number>(0);
   const [selectedPeriod, setSelectedPeriod] = useState<Period>(periods[0]);
 
@@ -359,6 +379,12 @@ function App() {
     setStakeAmount(tokenBalance);
   };
 
+  const updateTransferToken = (e: any) => {
+    // if e is a valid address, set transferTokenTo to e
+    setTransferTokenToValid(true);
+    setTransferTokenTo(e.target.value);
+  };
+
   return (
     <main>
       <Toaster />
@@ -377,10 +403,10 @@ function App() {
           {/* <div className="heroSectionBG"></div> top radial gradient */}
           <div className="heroSectionBG2"></div> {/* grid lines */}
           {/* content container */}
-          <div className="flex flex-col lg:flex-row justify-center px-8 lg:px-16 md:gap-6 2xl:gap-20 items-center">
+          <div className="flex flex-col lg:flex-row justify-center px-4 sm:px-8 lg:px-16 md:gap-6 2xl:gap-20 items-center">
             {/* lefthand content - logo, title, description */}
 
-            <div className="w-full h-[360px] sm:h-[320px] lg:h-full relative flex items-center">
+            <div className="w-full h-[320px] lg:h-full relative flex items-center">
               <div className="mr-4 lg:ml-4 xl:ml-8 lg:mr-0 mb-8 flex flex-col sm:items-center sm:w-full lg:w-auto lg:items-start">
                 {/* minpro tag - centered */}
                 <div className="mineproTag">
@@ -410,68 +436,81 @@ function App() {
               {/* <div className="publicSaleSectionBG sm:top-[120px]"></div> */}
 
               <div className="glassCard p-4 min-h-[540px] flex flex-col">
-                <div className="flex flex-col justify-center w-full max-w-2xl mx-auto  rounded-2xl px-8">
+                <div className="flex flex-col justify-center w-full max-w-2xl mx-auto  rounded-2xl">
                   {/* tabs */}
                   <div className="mx-auto mb-4 tabs grid w-full grid-cols-2">
-                    <button
-                      className={`tab ${
-                        activeTab === "stake" ? "text-white" : ""
-                      }`}
-                      onClick={() => setActiveTab("stake")}
-                    >
-                      Stake
-                    </button>
-                    <button
-                      className={`tab ${
-                        activeTab === "withdraw" ? "text-white" : ""
-                      }`}
-                      onClick={() => setActiveTab("withdraw")}
-                    >
-                      Withdraw
-                    </button>
+                    {tabs.map((tab) => (
+                      <button
+                        className={`tab ${
+                          activeTab === tab.toLowerCase() ? "text-white" : ""
+                        }`}
+                        onClick={() => setActiveTab(tab.toLowerCase() as any)}
+                      >
+                        {tab}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* user info grid */}
-                <UserInfo
-                  stakedBalance={"100"}
-                  totalStaked={"100"}
-                  tokenBalance={"100"}
-                  totalBNBRewards={"100"}
-                  tokenName={"100"}
-                  // stakedBalance={stakedBalance}
-                  // totalStaked={totalStaked}
-                  // tokenBalance={tokenBalance}
-                  // totalBNBRewards={bnbRewards}
-                  // tokenName={stakingListItem.reward}
-                />
+                {/* user info grid - show on deposit and withdraw */}
+                {(activeTab === "deposit" || activeTab === "withdraw") && (
+                  <UserInfo
+                    stakedBalance={"100"}
+                    totalStaked={"100"}
+                    tokenBalance={"100"}
+                    totalBNBRewards={"100"}
+                    tokenName={"100"}
+                    // stakedBalance={stakedBalance}
+                    // totalStaked={totalStaked}
+                    // tokenBalance={tokenBalance}
+                    // totalBNBRewards={bnbRewards}
+                    // tokenName={stakingListItem.reward}
+                  />
+                )}
 
                 {/* deposit/withdrawal component */}
-                <div className="mb-4 mt-auto">
-                  {activeTab === "stake" && (
+                <div className="mt-auto">
+                  {(activeTab === "deposit" || activeTab === "withdraw") && (
                     // <Deposit
                     //   tokenBalance={tokenBalance}
                     //   stakingListItem={stakingListItem}
                     //   pendingRewards={pendingRewards}
                     //   rewardTokenName={selectedToken?.name}
                     // />
-                    <>
-                      <p className="mt-4 text-left">Select period to stake: </p>
+                    <div>
+                      <p className="mt-4 text-left">
+                        Select period to {activeTab}:{" "}
+                      </p>
                       <select
                         name=""
                         id=""
+                        onChange={(e) => {
+                          setSelectedPeriod(
+                            periods.find((p) => p.period === e.target.value) ||
+                              periods[0]
+                          );
+                        }}
                         className="mt-1 border border-white/50 rounded-lg bg-transparent w-full p-2"
                       >
                         {periods.map((period) => (
-                          <option
-                            key={period.period}
-                            value={period.period}
-                            onClick={() => setSelectedPeriod(period)}
-                          >
+                          <option key={period.period} value={period.period}>
                             {period.period}
                           </option>
                         ))}
                       </select>
+                      {/* info about this period */}
+                      <div className="mt-2">
+                        <p className="text-center italic">
+                          {selectedPeriod.multiplier}x multiplier,{" "}
+                          {selectedPeriod.earlyUnstakeFee * 100}% unstake early
+                          fee
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === "deposit" && (
+                    <>
                       <div className="mt-4 grid grid-flow-row gap-2">
                         <div className="grid grid-cols-1 gap-2">
                           <div className="col-span-1">
@@ -501,9 +540,9 @@ function App() {
                               {stakingListItem.hasUnlockTime && (
                                 <span className="label-text-alt">
                                   {/* <LockTime 
-                  stakingListItem={stakingListItem}
-                  chain={chain}
-                /> */}
+                                      stakingListItem={stakingListItem}
+                                      chain={chain}
+                                    /> */}
                                 </span>
                               )}
                             </label>
@@ -613,7 +652,7 @@ function App() {
                     //   withdrawableBalance={stakedBalance}
                     //   stakingListItem={stakingListItem}
                     // />
-                    <div className="grid grid-flow-row gap-2">
+                    <div className="mt-4 grid grid-flow-row gap-2">
                       <div className="grid grid-cols-1 gap-2">
                         <div className="col-span-1">
                           <label className="label">
@@ -639,9 +678,9 @@ function App() {
                               {stakingListItem.hasUnlockTime && (
                                 <span className="label-text-alt">
                                   {/* <LockTime 
-                  stakingListItem={stakingListItem}
-                  chain={chain}
-                /> */}
+                                  stakingListItem={stakingListItem}
+                                  chain={chain}
+                                /> */}
                                 </span>
                               )}
                             </label>
@@ -690,6 +729,81 @@ function App() {
                             // }
                           >
                             {earlyWithdrawText()}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {activeTab === "transfer" && (
+                    <div className="mt-4 grid grid-flow-row gap-2">
+                      <div className="grid grid-cols-1 gap-2">
+                        {/* transfer from (principal) */}
+                        <div className="col-span-1">
+                          <p className="mt-4 text-left">Token to Transfer</p>
+                          <select
+                            name=""
+                            id=""
+                            onChange={(e) => {
+                              setTransferTokenPrincipal(
+                                tokens.find((t) => t.name === e.target.value)
+                                  ?.address || ""
+                              );
+                            }}
+                            className="mt-1 border border-white/50 rounded-lg bg-transparent w-full p-2"
+                          >
+                            {tokens.map((token) => (
+                              <option key={token.name} value={token.name}>
+                                {token.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* transfer to */}
+                        <div className="col-span-1">
+                          <p className="mt-4 text-left">
+                            Transfer Destination Address
+                          </p>
+                          <input
+                            value={transferTokenTo}
+                            onChange={updateTransferToken}
+                            className="mt-1 input input-bordered w-full"
+                            placeholder="Enter address..."
+                          />
+                        </div>
+
+                        {/* transfer amount */}
+                        <div className="col-span-1">
+                          <p className="mt-4 text-left">Amount to Transfer</p>
+                          <input
+                            value={transferAmount}
+                            onChange={(e) => setTransferAmount(e.target.value)}
+                            className="mt-1 input input-bordered w-full"
+                            placeholder="Enter amount..."
+                          />
+                        </div>
+
+                        {/* info about transfer */}
+                        <div className="col-span-1">
+                          {transferTokenToValid ? (
+                            <p className="mt-2 text-center italic">
+                              You're transferring {transferAmount} from{" "}
+                              {transferTokenPrincipal} to {transferTokenTo}
+                            </p>
+                          ) : (
+                            <p className="mt-2 text-center italic">
+                              Please enter a valid transfer address
+                            </p>
+                          )}
+                        </div>
+
+                        {/* transfer button */}
+                        <div className="col-span-1">
+                          <button
+                            className={`mt-2 orangeButton w-full bg-[#17181c]`}
+                            onClick={() => handleTransfer()}
+                          >
+                            Transfer
                           </button>
                         </div>
                       </div>

@@ -198,7 +198,7 @@ hr {
 }
 
 .tab {
-  padding: 8px 12px;
+  padding: 8px 4px;
 
   border: 1px solid rgba(242, 222, 247, 0.2);
   backdrop-filter: blur(48px);
