@@ -10,7 +10,7 @@ export { idlFactory } from "./minepro_staking_backend.did.js";
  * beginning in dfx 0.15.0
  */
 export const canisterId =
-  process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND;
+  process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND_30;
 
 export const createActor = (canisterId, options = {}) => {
   const agent = options.agent || new HttpAgent({ ...options.agentOptions });

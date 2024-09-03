@@ -17,6 +17,8 @@ pub enum GuardState {
 
 #[derive(CandidType, Deserialize)]
 pub struct State {
+    pub owner: Principal,
+
     pub lock_time: u64,
     pub leave_early_fee: NumTokens,
     pub fee_recipient: Principal,

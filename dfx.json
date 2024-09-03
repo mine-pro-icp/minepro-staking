@@ -11,14 +11,44 @@
       "type": "custom",
       "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
     },
-    "minepro_staking_backend": {
+    "minepro_staking_backend_30": {
+      "candid": "src/minepro_staking_backend/minepro_staking_backend.did",
+      "package": "minepro_staking_backend",
+      "type": "rust"
+    },
+    "minepro_staking_backend_90": {
+      "candid": "src/minepro_staking_backend/minepro_staking_backend.did",
+      "package": "minepro_staking_backend",
+      "type": "rust"
+    },
+    "minepro_staking_backend_180": {
+      "candid": "src/minepro_staking_backend/minepro_staking_backend.did",
+      "package": "minepro_staking_backend",
+      "type": "rust"
+    },
+    "minepro_staking_backend_1year": {
+      "candid": "src/minepro_staking_backend/minepro_staking_backend.did",
+      "package": "minepro_staking_backend",
+      "type": "rust"
+    },
+    "minepro_staking_backend_2year": {
+      "candid": "src/minepro_staking_backend/minepro_staking_backend.did",
+      "package": "minepro_staking_backend",
+      "type": "rust"
+    },
+    "minepro_staking_backend_5year": {
       "candid": "src/minepro_staking_backend/minepro_staking_backend.did",
       "package": "minepro_staking_backend",
       "type": "rust"
     },
     "minepro_staking_frontend": {
       "dependencies": [
-        "minepro_staking_backend"
+        "minepro_staking_backend_30",
+        "minepro_staking_backend_90",
+        "minepro_staking_backend_180",
+        "minepro_staking_backend_1year",
+        "minepro_staking_backend_2year",
+        "minepro_staking_backend_5year"
       ],
       "source": [
         "src/minepro_staking_frontend/dist"

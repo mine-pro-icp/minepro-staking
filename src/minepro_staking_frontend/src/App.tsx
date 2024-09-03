@@ -163,7 +163,7 @@ function App() {
 
   useEffect(() => {
     const backendActor = createBackendActor(
-      process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND!
+      process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND_30!
     );
 
     backendActor.getMetadata().then((mt) => {

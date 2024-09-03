@@ -45,6 +45,8 @@ fn post_upgrade() {
 #[candid_method(init)]
 fn init(args: InitArgs) {
     replace_state(State {
+        owner: api::caller(),
+
         lock_time: args.lock_time,
         leave_early_fee: args.leave_early_fee,
         fee_recipient: args.fee_recipient.owner,
@@ -58,6 +60,44 @@ fn init(args: InitArgs) {
         total_shares: NumTokens::from(0u8),
         dividends_per_share: NumTokens::from(0u8),
         precision: NumTokens::from(1000000000000000000u128), // 10^18
+    });
+}
+
+// Owner functions
+#[query(name = "changeOwner")]
+fn change_owner(new_owner: Principal) {
+    assert_eq!(read_state(|s| s.owner), api::caller());
+
+    mutate_state(|s| {
+        s.owner = new_owner; 
+    });
+}
+
+#[query(name = "setLockTime")]
+fn change_lock_time(new_lock_time: u64) {
+    assert_eq!(read_state(|s| s.owner), api::caller());
+
+    mutate_state(|s| {
+        s.lock_time = new_lock_time;
+    });
+}
+
+#[query(name = "setLeaveEarlyFee")]
+fn change_leave_early_fee(new_leave_early_fee: NumTokens) {
+    assert_eq!(read_state(|s| s.owner), api::caller());
+    assert!(new_leave_early_fee <= 70u8);
+    
+    mutate_state(|s| {
+        s.leave_early_fee = new_leave_early_fee;
+    });
+}
+
+#[query(name = "setFeeRecipient")]
+fn set_fee_recipient(new_fee_recipient: Principal) {
+    assert_eq!(read_state(|s| s.owner), api::caller());
+    
+    mutate_state(|s| {
+        s.fee_recipient = new_fee_recipient;
     });
 }
 

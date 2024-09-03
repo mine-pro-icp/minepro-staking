@@ -2,6 +2,24 @@
   "minepro_staking_backend": {
     "ic": "mwrwg-4yaaa-aaaap-qhswq-cai"
   },
+  "minepro_staking_backend_180": {
+    "ic": "5kbxs-6iaaa-aaaap-qhwca-cai"
+  },
+  "minepro_staking_backend_1year": {
+    "ic": "5narg-tqaaa-aaaap-qhwcq-cai"
+  },
+  "minepro_staking_backend_2year": {
+    "ic": "5ed22-fyaaa-aaaap-qhwda-cai"
+  },
+  "minepro_staking_backend_30": {
+    "ic": "5yhal-syaaa-aaaap-qhwba-cai"
+  },
+  "minepro_staking_backend_5year": {
+    "ic": "5dc4o-iaaaa-aaaap-qhwdq-cai"
+  },
+  "minepro_staking_backend_90": {
+    "ic": "57gg7-7aaaa-aaaap-qhwbq-cai"
+  },
   "minepro_staking_frontend": {
     "ic": "pgc4a-ayaaa-aaaap-qhs6q-cai"
   }
