@@ -5,7 +5,7 @@ interface UserInfoProps {
   tokenBalance: string,
   totalStaked: string,
   stakedBalance: string,
-  totalBNBRewards: string,
+  totalRewards: string,
   tokenName: string
 }
 
@@ -13,7 +13,7 @@ const UserInfo: FC<UserInfoProps> = ({
   tokenBalance, 
   totalStaked, 
   stakedBalance, 
-  totalBNBRewards,
+  totalRewards,
   tokenName
 } : UserInfoProps) => {
 
@@ -56,7 +56,7 @@ const UserInfo: FC<UserInfoProps> = ({
             Total Rewards
           </div>
           <div className="text-right font-bold text-lg">
-            <CountUp end={Number(totalBNBRewards) || 0} decimals={2} /> BNB
+            <CountUp end={Number(totalRewards) || 0} decimals={2} /> BTC
           </div>
         </div>
       </div>

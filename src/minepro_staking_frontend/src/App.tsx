@@ -23,39 +23,6 @@ import UnlockTime from "./components/UnlockTime";
 import { Toaster, toast } from "sonner";
 import Approve from "./components/helpers/Approve";
 
-type StakingListItem = {
-  shortName: string;
-  apy: string;
-  pool: Contract;
-  token: Contract;
-  name: string;
-  reward: string;
-  depositFunction: string;
-  poolImg: StaticImageData;
-  primaryBtn?: Button;
-  secondaryBtn?: Button;
-  showClaimBtn: boolean;
-  pendingRewardsFunction?: string;
-  hasUnlockTime: boolean;
-  unlockTimeFunction?: string;
-  lockTimeFunction?: string;
-  isYieldFarm: boolean;
-};
-
-const stakingListItem: StakingListItem = {
-  shortName: "MINE",
-  apy: "10-20%",
-  pool: minepro_staking_backend,
-  token: defaultTokenClient,
-  name: "MINE",
-  reward: "BNB",
-  depositFunction: "stake",
-  poolImg: "/minepro.png",
-  showClaimBtn: true,
-  hasUnlockTime: true,
-  isYieldFarm: false,
-};
-
 const stakedAssetName = "$MINE";
 const rewardTokenName = "BTC";
 const tabs = ["Deposit", "Withdraw", "Transfer"];
@@ -64,37 +31,44 @@ interface Period {
   period: string;
   multiplier: number;
   earlyUnstakeFee: number;
+  principal: string;
 }
 const periods: Period[] = [
   {
     period: "30 Days",
     multiplier: 1,
     earlyUnstakeFee: 0.1,
+    principal: process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND_30!,
   },
   {
     period: "90 Days",
     multiplier: 2,
     earlyUnstakeFee: 0.15,
+    principal: process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND_90!,
   },
   {
     period: "180 Days",
     multiplier: 5,
     earlyUnstakeFee: 0.2,
+    principal: process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND_180!,
   },
   {
     period: "1 Year",
     multiplier: 10,
     earlyUnstakeFee: 0.3,
+    principal: process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND_1YEAR!,
   },
   {
     period: "2 Years",
     multiplier: 20,
     earlyUnstakeFee: 0.5,
+    principal: process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND_2YEAR!,
   },
   {
     period: "5 Years",
     multiplier: 50,
     earlyUnstakeFee: 0.7,
+    principal: process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND_5YEAR!,
   },
 ];
 
@@ -106,17 +80,23 @@ interface Token {
 const tokens: Token[] = [
   {
     name: "MINE",
-    address: "0xf82007D28B8D0EaFC6Fde42eCb697A74824D839E",
+    address: "3pyv7-7iaaa-aaaal-qjufa-cai",
   },
   {
-    name: "BNB",
-    address: "0x......",
+    name: "ckBTC",
+    address: "mxzaz-hqaaa-aaaar-qaada-cai",
   },
 ];
 
 interface UserInfo {
-  balance: bigint;
-  reward: bigint;
+  tokenBalance: bigint;
+  stakedBalance: bigint;
+  pendingRewards: bigint;
+}
+
+interface PoolInfo {
+  totalStaked: bigint;
+  totalRewards: bigint;
 }
 
 function App() {
@@ -124,6 +104,7 @@ function App() {
 
   const [metadata, setMetadata] = useState<Metadata | undefined>(undefined);
   const [userInfo, setUserInfo] = useState<UserInfo | undefined>(undefined);
+  const [poolInfo, setPoolInfo] = useState<PoolInfo | undefined>(undefined);
 
   const [stakeAmount, setStakeAmount] = useState<string>("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
@@ -183,7 +164,7 @@ function App() {
 
   useEffect(() => {
     const backendActor = createBackendActor(
-      process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND_30!
+      selectedPeriod.principal,
     );
 
     backendActor.getMetadata().then((mt) => {
@@ -195,18 +176,30 @@ function App() {
 
       setIdentity(authClient.getIdentity());
     });
-  }, []);
+  }, [selectedPeriod]);
 
   async function fetchUserInfo() {
     const agent = await HttpAgent.create({ identity });
     const backendActor = createBackendActor(
-      process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND!,
+      selectedPeriod.principal,// process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND!,
       { agent }
     );
 
-    setUserInfo({
-      balance: await backendActor.balanceOf(identity!.getPrincipal()),
-      reward: await backendActor.pendingRewards(),
+    const tokenActor = createBackendActor(
+      tokens[0].address,// process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND!,
+      { agent }
+    );
+    if (identity != undefined) {
+      setUserInfo({
+        stakedBalance: await backendActor.balanceOf(identity!.getPrincipal()),
+        tokenBalance: await tokenActor.balanceOf(identity!.getPrincipal()),
+        pendingRewards: await backendActor.pendingRewards(),
+      });
+    }
+
+    setPoolInfo({
+      totalStaked: await backendActor.totalSupply(),
+      totalRewards: await backendActor.totalRewards(),
     });
   }
 
@@ -253,7 +246,7 @@ function App() {
     }
 
     const backendActor = createBackendActor(
-      process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND!,
+      selectedPeriod.principal,
       { agent }
     );
 
@@ -278,7 +271,7 @@ function App() {
 
     const agent = await HttpAgent.create({ identity });
     const backendActor = createBackendActor(
-      process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND!,
+      selectedPeriod.principal,
       { agent }
     );
 
@@ -302,7 +295,7 @@ function App() {
   async function handleClaimRewards() {
     const agent = await HttpAgent.create({ identity });
     const backendActor = createBackendActor(
-      process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND!,
+      selectedPeriod.principal,
       { agent }
     );
 
@@ -361,12 +354,9 @@ function App() {
     fetchUserInfo();
   }, [identity]);
 
-  // useEffect(() => {
-  //   if (timeLeft !== undefined && timeLeft !== null) {
-  //     setSecsToUnlock(Number(timeLeft.toString()));
-  //   }
-  //   queryClient.invalidateQueries({ queryKey: timeLeftquery });
-  // }, [blockNumber]);
+  useEffect(() => {
+    fetchUserInfo();
+  }, [selectedPeriod]);
 
   const earlyWithdrawText = (): string => {
     if (secsToUnlock == undefined || secsToUnlock == null) {
@@ -427,8 +417,6 @@ function App() {
                   </p>
                 </div>
               </div>
-              {/* <div className="absolute inset-0">
-            </div> */}
             </div>
 
             {/* righthand content - presale card */}
@@ -455,28 +443,17 @@ function App() {
                 {/* user info grid - show on deposit and withdraw */}
                 {(activeTab === "deposit" || activeTab === "withdraw") && (
                   <UserInfo
-                    stakedBalance={"100"}
-                    totalStaked={"100"}
-                    tokenBalance={"100"}
-                    totalBNBRewards={"100"}
-                    tokenName={"100"}
-                    // stakedBalance={stakedBalance}
-                    // totalStaked={totalStaked}
-                    // tokenBalance={tokenBalance}
-                    // totalBNBRewards={bnbRewards}
-                    // tokenName={stakingListItem.reward}
+                    stakedBalance={userInfo?.stakedBalance.toString() || "0"} // amount of $MINE user has staked in pool (pool specific)
+                    totalStaked={metadata?.total_staked.toString() || "0"}   // total $MINE staked (pool specific)
+                    tokenBalance={userInfo?.tokenBalance.toString() || "0"}  // $MINE balance of user (same for all pools)
+                    totalRewards={metadata?.total_rewards.toString() || "0"}  // total ckBTC rewards (pool specific)
+                    tokenName={"$MINE"}
                   />
                 )}
 
                 {/* deposit/withdrawal component */}
                 <div className="mt-auto">
                   {(activeTab === "deposit" || activeTab === "withdraw") && (
-                    // <Deposit
-                    //   tokenBalance={tokenBalance}
-                    //   stakingListItem={stakingListItem}
-                    //   pendingRewards={pendingRewards}
-                    //   rewardTokenName={selectedToken?.name}
-                    // />
                     <div>
                       <p className="mt-4 text-left">
                         Select period to {activeTab}:{" "}
@@ -523,38 +500,9 @@ function App() {
                                   minimumFractionDigits: 0,
                                   maximumFractionDigits: 2,
                                 })}
-                                {stakingListItem.isYieldFarm &&
-                                  parseFloat(tokenBalance?.toString()) <= 0 && (
-                                    <a
-                                      href={
-                                        "https://pancakeswap.finance/v2/add/BNB/0xf82007D28B8D0EaFC6Fde42eCb697A74824D839E"
-                                      }
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="ml-2 text-xs text-red-400 underline"
-                                    >
-                                      Get LP Tokens
-                                    </a>
-                                  )}
                               </span>
-                              {stakingListItem.hasUnlockTime && (
-                                <span className="label-text-alt">
-                                  {/* <LockTime 
-                                      stakingListItem={stakingListItem}
-                                      chain={chain}
-                                    /> */}
-                                </span>
-                              )}
                             </label>
                             <div className="relative rounded-sm shadow-sm">
-                              {/* <div className="absolute inset-y-0 left-2 gap-3 flex items-center">
-                                <img
-                                  src={stakingListItem.poolImg}
-                                  height={25}
-                                  width={25}
-                                  alt="token icon"
-                                />
-                              </div> */}
                               <input
                                 id="stake"
                                 alt="Stake"
@@ -576,67 +524,14 @@ function App() {
                             </div>
                           </div>
                           <div className="col-span-1">
-                            {insufficientAllowance ? (
-                              <Approve
-                                token={stakingListItem.token[56]}
-                                spender={stakingListItem.pool[56]}
-                              />
-                            ) : (
                               <div className="flex flex-col w-full gap-2 mt-2 sm:flex-row justify-evenly items-center">
                                 <button
                                   className={`orangeButton w-full bg-[#17181c]`}
                                   onClick={() => handleStake()}
-                                  // onClick={() =>
-                                  //   depositCall({
-                                  //     abi: stakingListItem.pool.abi,
-                                  //     address:
-                                  //       stakingListItem.pool[56]?.address ||
-                                  //       zeroAddress,
-                                  //     functionName:
-                                  //       stakingListItem.depositFunction,
-                                  //     args: [parseEther(amount || "0")],
-                                  //   })
-                                  // }
-                                  //disabled={!depositCall}
                                 >
                                   Deposit
                                 </button>
-
-                                {/* <button
-                className={`btn btn-block bg-[#17181c] btn-primary mb-2 mt-1 ${
-                  depositFetchStatus === "fetching" ? "loading" : ""
-                }`}
-                onClick={() =>
-                  depositCall({
-                    abi: stakingListItem.pool.abi,
-                    address: stakingListItem.pool[56]?.address || zeroAddress,
-                    functionName: stakingListItem.depositFunction,
-                    args: [parseEther(amount || "0")],
-                  })
-                }
-                disabled={!depositCall}
-              >
-                Deposit
-              </button> */}
-                                {/* <button
-                className={`btn btn-block bg-[#17181c] btn-primary ${
-                  claimFetchStatus === "fetching" ? "loading" : ""
-                }`}
-                onClick={() =>
-                  claimCall({
-                    abi: stakingListItem.pool.abi,
-                    address: stakingListItem.pool[56]?.address || zeroAddress,
-                    functionName: "claimRewards",
-                    args: [BigInt(1)],
-                  })
-                }
-                disabled={!claimCall}
-              >
-                Claim {parseFloat(pendingRewards || "0").toFixed(3)}{" "}
-                {rewardTokenName}
-              </button> */}
                               </div>
-                            )}
                           </div>
                           <div className="mt-4 w-full flex justify-center">
                             <p className="italic max-w-[240px]">
@@ -648,51 +543,18 @@ function App() {
                     </>
                   )}
                   {activeTab === "withdraw" && (
-                    // <Withdraw
-                    //   withdrawableBalance={stakedBalance}
-                    //   stakingListItem={stakingListItem}
-                    // />
                     <div className="mt-4 grid grid-flow-row gap-2">
                       <div className="grid grid-cols-1 gap-2">
                         <div className="col-span-1">
                           <label className="label">
                             <div></div>
-                            {stakingListItem.hasUnlockTime && (
                               <span className="label-text-alt">
                                 <UnlockTime secsToUnlock={secsToUnlock} />
                               </span>
-                            )}
                           </label>
 
                           <div className="mt-1 col-span-1">
-                            <label className="label">
-                              {/* <span className="label-text">
-                                Balance:{" "}
-                                {parseFloat(
-                                  withdrawableBalance || "0"
-                                ).toLocaleString([], {
-                                  minimumFractionDigits: 0,
-                                  maximumFractionDigits: 2,
-                                })}
-                              </span> */}
-                              {stakingListItem.hasUnlockTime && (
-                                <span className="label-text-alt">
-                                  {/* <LockTime 
-                                  stakingListItem={stakingListItem}
-                                  chain={chain}
-                                /> */}
-                                </span>
-                              )}
-                            </label>
                             <div className="relative rounded-sm shadow-sm">
-                              {/* <div className="absolute inset-y-0 ml-3 flex items-center">
-                                <img
-                                  src={stakingListItem.poolImg}
-                                  height={25}
-                                  width={25}
-                                  alt={stakingListItem.name}
-                                />
-                              </div> */}
                               <input
                                 value={withdrawAmount}
                                 //onChange={handleChangeAmount}
@@ -717,16 +579,6 @@ function App() {
                           <button
                             className={`mt-4 orangeButton w-full bg-[#17181c]`}
                             onClick={() => handleWithdraw()}
-                            // onClick={() =>
-                            //   withdrawCall({
-                            //     abi: stakingListItem.pool.abi,
-                            //     address:
-                            //       stakingListItem.pool[56]?.address ||
-                            //       zeroAddress,
-                            //     functionName: "withdraw",
-                            //     args: [parseEther(amount || "0")],
-                            //   })
-                            // }
                           >
                             {earlyWithdrawText()}
                           </button>
@@ -818,17 +670,6 @@ function App() {
                       <button
                         className={`orangeButton w-full bg-[#17181c]`}
                         onClick={() => handleClaimRewards()}
-                        // onClick={() =>
-                        //   claimCall({
-                        //     abi: stakingListItem.pool.abi,
-                        //     address:
-                        //       stakingListItem.pool[56]?.address ||
-                        //       zeroAddress,
-                        //     functionName: "claimRewards",
-                        //     args: [BigInt(1)],
-                        //   })
-                        // }
-                        //disabled={!claimCall}
                       >
                         Claim {parseFloat(pendingRewards || "0").toFixed(3)}{" "}
                         {rewardTokenName}
@@ -898,6 +739,8 @@ function App() {
               <p>Reward Token: {metadata.reward.toString()}</p>
               <p>Lock Time: {metadata.lock_time.toString()}</p>
               <p>Leave Early Fee: {metadata.leave_early_fee.toString()}</p>
+              <p>Total Staked: {metadata.total_staked.toString()}</p>
+              <p>Total Rewards: {metadata.total_rewards.toString()}</p>
             </>
           )}
         </section>

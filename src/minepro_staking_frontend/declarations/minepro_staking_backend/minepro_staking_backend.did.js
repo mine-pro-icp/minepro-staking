@@ -25,11 +25,14 @@ export const idlFactory = ({ IDL }) => {
     'reward' : IDL.Principal,
     'token' : IDL.Principal,
     'leave_early_fee' : IDL.Nat,
+    'total_rewards' : IDL.Nat,
     'fee_recipient' : IDL.Principal,
+    'total_staked' : IDL.Nat,
     'lock_time' : IDL.Nat64,
   });
   return IDL.Service({
     'balanceOf' : IDL.Func([IDL.Principal], [IDL.Nat], ['query']),
+    'changeOwner' : IDL.Func([IDL.Principal], [], ['query']),
     'claimRewards' : IDL.Func([], [Result], []),
     'depositRewards' : IDL.Func(
         [IDL.Nat, IDL.Opt(IDL.Vec(IDL.Nat8))],
@@ -38,6 +41,9 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getMetadata' : IDL.Func([], [Metadata], ['query']),
     'pendingRewards' : IDL.Func([], [IDL.Nat], ['query']),
+    'setFeeRecipient' : IDL.Func([IDL.Principal], [], ['query']),
+    'setLeaveEarlyFee' : IDL.Func([IDL.Nat], [], ['query']),
+    'setLockTime' : IDL.Func([IDL.Nat64], [], ['query']),
     'stake' : IDL.Func([IDL.Nat, IDL.Opt(IDL.Vec(IDL.Nat8))], [Result], []),
     'totalRewards' : IDL.Func([], [IDL.Nat], ['query']),
     'totalSupply' : IDL.Func([], [IDL.Nat], ['query']),

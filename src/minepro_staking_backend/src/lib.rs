@@ -140,6 +140,8 @@ struct Metadata {
     pub fee_recipient: Principal,
     pub token: Principal,
     pub reward: Principal,
+    pub total_staked: NumTokens,
+    pub total_rewards: NumTokens,
 }
 
 #[query(name = "getMetadata")]
@@ -150,6 +152,8 @@ fn get_metadata() -> Metadata {
         fee_recipient: s.fee_recipient,
         token: s.token,
         reward: s.reward,
+        total_staked: s.total_shares.clone(),
+        total_rewards: s.total_rewards.clone(),
     })
 }
 
