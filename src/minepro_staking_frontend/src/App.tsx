@@ -109,11 +109,10 @@ function App() {
   const [stakeAmount, setStakeAmount] = useState<string>("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
-  const [transferTokenPrincipal, setTransferTokenPrincipal] = useState("");
+  const [transferTokenPrincipal, setTransferTokenPrincipal] = useState(tokens[0].address);
   const [transferTokenTo, setTransferTokenTo] = useState("");
   const [transferTokenToValid, setTransferTokenToValid] = useState(false);
 
-  const [tokenBalance, setTokenBalance] = useState<string>("0");
   const [pendingRewards, setPendingRewards] = useState<string>("0");
   const [insufficientAllowance, setInsufficentAllowance] =
     useState<boolean>(false);
@@ -185,14 +184,14 @@ function App() {
       { agent }
     );
 
-    const tokenActor = createBackendActor(
+    const tokenActor = createTokenActor(
       tokens[0].address,// process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND!,
       { agent }
     );
     if (identity != undefined) {
       setUserInfo({
         stakedBalance: await backendActor.balanceOf(identity!.getPrincipal()),
-        tokenBalance: await tokenActor.balanceOf(identity!.getPrincipal()),
+        tokenBalance: await tokenActor.icrc1_balance_of({ owner: identity!.getPrincipal(), subaccount: [] }),
         pendingRewards: await backendActor.pendingRewards(),
       });
     }
@@ -222,9 +221,7 @@ function App() {
     try {
       const approveRes = await stakedTokenActor.icrc2_approve({
         spender: {
-          owner: Principal.fromText(
-            process.env.CANISTER_ID_MINEPRO_STAKING_BACKEND!
-          ),
+          owner: Principal.fromText(selectedPeriod.principal),
           subaccount: [],
         },
         amount: amount + stakedTokenFee,
@@ -241,6 +238,7 @@ function App() {
         return;
       }
     } catch (e) {
+      console.log(e);
       window.alert("Approve token failed");
       return;
     }
@@ -320,6 +318,7 @@ function App() {
 
   async function handleTransfer() {
     const agent = await HttpAgent.create({ identity });
+    console.log(transferTokenPrincipal);
     const tokenActor = createTokenActor(transferTokenPrincipal, { agent });
 
     try {
@@ -366,7 +365,7 @@ function App() {
   };
 
   const maxDeposit = () => {
-    setStakeAmount(tokenBalance);
+    setStakeAmount((userInfo?.tokenBalance || BigInt(0)).toString());
   };
 
   const updateTransferToken = (e: any) => {
@@ -467,7 +466,7 @@ function App() {
                               periods[0]
                           );
                         }}
-                        className="mt-1 border border-white/50 rounded-lg bg-transparent w-full p-2"
+                        className="mt-1 border rounded-lg border-white/50 bg-black w-full p-2"
                       >
                         {periods.map((period) => (
                           <option key={period.period} value={period.period}>
@@ -495,7 +494,7 @@ function App() {
                               <span className="text-sm">
                                 Balance:{" "}
                                 {parseFloat(
-                                  tokenBalance?.toString()
+                                  userInfo?.tokenBalance.toString() || "0"
                                 ).toLocaleString([], {
                                   minimumFractionDigits: 0,
                                   maximumFractionDigits: 2,
@@ -598,10 +597,10 @@ function App() {
                             onChange={(e) => {
                               setTransferTokenPrincipal(
                                 tokens.find((t) => t.name === e.target.value)
-                                  ?.address || ""
+                                  ?.address || tokens[0].address
                               );
                             }}
-                            className="mt-1 border border-white/50 rounded-lg bg-transparent w-full p-2"
+                            className="mt-1 border border-white/50 rounded-lg bg-black w-full p-2"
                           >
                             {tokens.map((token) => (
                               <option key={token.name} value={token.name}>
@@ -639,8 +638,7 @@ function App() {
                         <div className="col-span-1">
                           {transferTokenToValid ? (
                             <p className="mt-2 text-center italic">
-                              You're transferring {transferAmount} from{" "}
-                              {transferTokenPrincipal} to {transferTokenTo}
+                              You're transferring {transferAmount} to {transferTokenTo}
                             </p>
                           ) : (
                             <p className="mt-2 text-center italic">
@@ -748,8 +746,8 @@ function App() {
         <section id="userinfo">
           {userInfo && (
             <>
-              <p>Staked Amount: {userInfo.balance.toString()}</p>
-              <p>Rewards to claim: {userInfo.reward.toString()}</p>
+              <p>Staked Amount: {(userInfo?.stakedBalance || BigInt(0)).toString()}</p>
+              <p>Rewards to claim: {(userInfo?.pendingRewards || BigInt(0)).toString()}</p>
             </>
           )}
         </section>
