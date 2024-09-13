@@ -24,7 +24,7 @@ import { Toaster, toast } from "sonner";
 import Approve from "./components/helpers/Approve";
 
 const stakedAssetName = "$MINE";
-const rewardTokenName = "BTC";
+const rewardTokenName = "ckBTC";
 const tabs = ["Deposit", "Withdraw", "Transfer"];
 
 interface Period {
@@ -663,15 +663,15 @@ function App() {
                   )}
                 </div>
                 {/* claim rewards button */}
-                {pendingRewards && (
+                {userInfo && (
                   <div className="mt-4">
                     <p className="text-left mb-1">Claim Rewards: </p>
-                    {parseFloat(pendingRewards) > 0 ? (
+                    {userInfo.pendingRewards > 0 ? (
                       <button
                         className={`orangeButton w-full bg-[#17181c]`}
                         onClick={() => handleClaimRewards()}
                       >
-                        Claim {parseFloat(pendingRewards || "0").toFixed(3)}{" "}
+                        Claim {parseFloat(userInfo.pendingRewards.toString()) / 100000000}{" "}
                         {rewardTokenName}
                       </button>
                     ) : (
