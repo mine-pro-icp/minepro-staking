@@ -80,7 +80,7 @@ interface Token {
 const tokens: Token[] = [
   {
     name: "MINE",
-    address: "3pyv7-7iaaa-aaaal-qjufa-cai",
+    address: "3pplk-2yaaa-aaaag-alqsq-cai",
   },
   {
     name: "ckBTC",
@@ -194,6 +194,8 @@ function App() {
         tokenBalance: await tokenActor.icrc1_balance_of({ owner: identity!.getPrincipal(), subaccount: [] }),
         pendingRewards: await backendActor.pendingRewards(),
       });
+
+      console.log((await tokenActor.icrc1_balance_of({ owner: identity!.getPrincipal(), subaccount: []})).toString());
     }
 
     setPoolInfo({
@@ -728,7 +730,7 @@ function App() {
       </div>
 
       {/* GIANGS METADATA CODE */}
-      <section className="bg-red-300 text-black ">
+      {/* section className="bg-red-300 text-black ">
         <h4>DEV:</h4>
         <section id="metadata">
           {metadata && (
@@ -755,7 +757,7 @@ function App() {
         <button className="tab" onClick={() => handleClaimRewards()}>
           Claim Rewards
         </button>
-      </section>
+      </section> */}
 
       <Footer />
     </main>
