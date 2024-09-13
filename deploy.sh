@@ -1,6 +1,6 @@
 export MINTER=$(dfx identity get-principal)
 export REWARD=mxzaz-hqaaa-aaaar-qaada-cai
-export TOKEN=3pyv7-7iaaa-aaaal-qjufa-cai
+export TOKEN=3pplk-2yaaa-aaaag-alqsq-cai
 export FEE_RECIPIENT=y7qze-p442g-4trdg-6b3vn-f2m3n-2nlvp-htzga-5jojr-jn6zo-fwbaq-3qe
 
 # 30 days
