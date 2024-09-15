@@ -28,14 +28,15 @@ type StakingError = variant {
 };
 service : (InitArgs) -> {
   balanceOf : (principal) -> (nat) query;
-  changeOwner : (principal) -> () query;
   claimRewards : () -> (Result);
   depositRewards : (nat, opt blob) -> (Result);
+  devOnlySetTokenDoNotCallThis : (principal) -> ();
   getMetadata : () -> (Metadata) query;
   pendingRewards : () -> (nat) query;
-  setFeeRecipient : (principal) -> () query;
-  setLeaveEarlyFee : (nat) -> () query;
-  setLockTime : (nat64) -> () query;
+  setFeeRecipient : (principal) -> ();
+  setLeaveEarlyFee : (nat) -> ();
+  setLockTime : (nat64) -> ();
+  setOwner : (principal) -> ();
   stake : (nat, opt blob) -> (Result);
   totalRewards : () -> (nat) query;
   totalSupply : () -> (nat) query;

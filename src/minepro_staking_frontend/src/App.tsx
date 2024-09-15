@@ -80,7 +80,7 @@ interface Token {
 const tokens: Token[] = [
   {
     name: "MINE",
-    address: "3pplk-2yaaa-aaaag-alqsq-cai",
+    address: "bl2fl-2aaaa-aaaap-qhyoq-cai",
   },
   {
     name: "ckBTC",
@@ -214,7 +214,7 @@ function App() {
       return;
     }
 
-    const amount = BigInt(stakeAmount);
+    const amount = BigInt(Math.floor(parseFloat(stakeAmount) * 100000000));
 
     const agent = await HttpAgent.create({ identity });
     const stakedTokenActor = createTokenActor(metadata!.token, { agent });
@@ -267,7 +267,7 @@ function App() {
   }
 
   async function handleWithdraw() {
-    const amount = BigInt(withdrawAmount);
+    const amount = BigInt(Math.floor(parseFloat(withdrawAmount) * 100000000));
 
     const agent = await HttpAgent.create({ identity });
     const backendActor = createBackendActor(
@@ -329,7 +329,7 @@ function App() {
           owner: Principal.fromText(transferTokenTo),
           subaccount: [],
         },
-        amount: BigInt(transferAmount),
+        amount: BigInt(Math.floor(parseFloat(transferAmount)*100000000)),
         fee: [],
         memo: [],
         from_subaccount: [],
@@ -349,6 +349,10 @@ function App() {
     }
   }
 
+  // useEffect(() => {
+  //   console.log(BigInt("420.69").toString());
+  // });
+
   useEffect(() => {
     if (identity === undefined) return;
 
@@ -367,7 +371,7 @@ function App() {
   };
 
   const maxDeposit = () => {
-    setStakeAmount((userInfo?.tokenBalance || BigInt(0)).toString());
+    setStakeAmount((parseFloat((userInfo?.tokenBalance || BigInt(0)).toString()) / 100000000).toString());
   };
 
   const updateTransferToken = (e: any) => {
@@ -495,9 +499,9 @@ function App() {
                             <label className="label">
                               <span className="text-sm">
                                 Balance:{" "}
-                                {parseFloat(
+                                {(parseFloat(
                                   userInfo?.tokenBalance.toString() || "0"
-                                ).toLocaleString([], {
+                                ) / 100000000).toLocaleString([], {
                                   minimumFractionDigits: 0,
                                   maximumFractionDigits: 2,
                                 })}

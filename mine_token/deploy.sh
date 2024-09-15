@@ -1,4 +1,4 @@
-export PRE_MINTED_TOKENS=420_000_000
+export PRE_MINTED_TOKENS=42_000_000_000_000_000
 export DEFAULT=$(dfx identity get-principal)
 export TRANSFER_FEE=0
 export ARCHIVE_CONTROLLER=$(dfx identity get-principal)

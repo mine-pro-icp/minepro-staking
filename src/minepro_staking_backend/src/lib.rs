@@ -63,9 +63,9 @@ fn init(args: InitArgs) {
     });
 }
 
-// Owner functions
-#[query(name = "changeOwner")]
-fn change_owner(new_owner: Principal) {
+// OWNER ONLY FUNCTIONS
+#[update(name = "setOwner")]
+fn set_owner(new_owner: Principal) {
     assert_eq!(read_state(|s| s.owner), api::caller());
 
     mutate_state(|s| {
@@ -73,7 +73,7 @@ fn change_owner(new_owner: Principal) {
     });
 }
 
-#[query(name = "setLockTime")]
+#[update(name = "setLockTime")]
 fn change_lock_time(new_lock_time: u64) {
     assert_eq!(read_state(|s| s.owner), api::caller());
 
@@ -82,7 +82,7 @@ fn change_lock_time(new_lock_time: u64) {
     });
 }
 
-#[query(name = "setLeaveEarlyFee")]
+#[update(name = "setLeaveEarlyFee")]
 fn change_leave_early_fee(new_leave_early_fee: NumTokens) {
     assert_eq!(read_state(|s| s.owner), api::caller());
     assert!(new_leave_early_fee <= 70u8);
@@ -92,7 +92,7 @@ fn change_leave_early_fee(new_leave_early_fee: NumTokens) {
     });
 }
 
-#[query(name = "setFeeRecipient")]
+#[update(name = "setFeeRecipient")]
 fn set_fee_recipient(new_fee_recipient: Principal) {
     assert_eq!(read_state(|s| s.owner), api::caller());
     
@@ -101,6 +101,16 @@ fn set_fee_recipient(new_fee_recipient: Principal) {
     });
 }
 
+#[update(name = "devOnlySetTokenDoNotCallThis")]
+fn set_staked_token(new_token: Principal) {
+    assert_eq!(read_state(|s| s.owner), api::caller());
+
+    mutate_state(|s| {
+        s.token = new_token;
+    });
+}
+
+// USERS FUNCTIONS
 #[query(name = "totalSupply")]
 fn total_supply() -> NumTokens {
     read_state(|s| s.total_shares.clone())

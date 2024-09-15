@@ -26,7 +26,7 @@ const UserInfo: FC<UserInfoProps> = ({
           </div>
           <div className="text-left font-bold text-lg">
             <CountUp end={
-              Number(tokenBalance || '0')
+              Number(tokenBalance || '0') / 100000000
               } decimals={2} separator="," />&nbsp;{tokenName}
           </div>
         </div>
@@ -35,7 +35,7 @@ const UserInfo: FC<UserInfoProps> = ({
             Total Staked
           </div>
           <div className="text-right font-bold text-lg">
-            <CountUp end={Number(totalStaked) || 0} decimals={0} separator="," /> {tokenName}
+            <CountUp end={(Number(totalStaked) || 0) / 100000000} decimals={0} separator="," /> {tokenName}
             
           </div>
         </div>
@@ -48,7 +48,7 @@ const UserInfo: FC<UserInfoProps> = ({
 
           </div>
           <div className="text-left font-bold text-lg">
-            <CountUp end={Number(stakedBalance) || 0} decimals={2} separator="," />&nbsp;{tokenName}
+            <CountUp end={(Number(stakedBalance) || 0) / 100000000} decimals={2} separator="," />&nbsp;{tokenName}
           </div>
         </div>
         <div>
@@ -56,7 +56,7 @@ const UserInfo: FC<UserInfoProps> = ({
             Total Rewards
           </div>
           <div className="text-right font-bold text-lg">
-            <CountUp end={Number(totalRewards) || 0} decimals={2} /> BTC
+            <CountUp end={(Number(totalRewards) || 0) / 100000000} decimals={2} /> BTC
           </div>
         </div>
       </div>
