@@ -66,6 +66,7 @@ fn init(args: InitArgs) {
 // OWNER ONLY FUNCTIONS
 #[update(name = "setOwner")]
 fn set_owner(new_owner: Principal) {
+    reject_anonymous_call();
     assert_eq!(read_state(|s| s.owner), api::caller());
 
     mutate_state(|s| {
@@ -75,6 +76,7 @@ fn set_owner(new_owner: Principal) {
 
 #[update(name = "setLockTime")]
 fn change_lock_time(new_lock_time: u64) {
+    reject_anonymous_call();
     assert_eq!(read_state(|s| s.owner), api::caller());
 
     mutate_state(|s| {
@@ -84,6 +86,7 @@ fn change_lock_time(new_lock_time: u64) {
 
 #[update(name = "setLeaveEarlyFee")]
 fn change_leave_early_fee(new_leave_early_fee: NumTokens) {
+    reject_anonymous_call();
     assert_eq!(read_state(|s| s.owner), api::caller());
     assert!(new_leave_early_fee <= 70u8);
     
@@ -94,6 +97,7 @@ fn change_leave_early_fee(new_leave_early_fee: NumTokens) {
 
 #[update(name = "setFeeRecipient")]
 fn set_fee_recipient(new_fee_recipient: Principal) {
+    reject_anonymous_call();
     assert_eq!(read_state(|s| s.owner), api::caller());
     
     mutate_state(|s| {
@@ -103,6 +107,7 @@ fn set_fee_recipient(new_fee_recipient: Principal) {
 
 #[update(name = "devOnlySetTokenDoNotCallThis")]
 fn set_staked_token(new_token: Principal) {
+    reject_anonymous_call();
     assert_eq!(read_state(|s| s.owner), api::caller());
 
     mutate_state(|s| {
