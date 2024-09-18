@@ -110,6 +110,7 @@ function App() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const [transferTokenPrincipal, setTransferTokenPrincipal] = useState(tokens[0].address);
+  const [transferTokenBalance, setTransferTokenBalance] = useState(BigInt(0));
   const [transferTokenTo, setTransferTokenTo] = useState("");
   const [transferTokenToValid, setTransferTokenToValid] = useState(false);
 
@@ -353,6 +354,14 @@ function App() {
   //   console.log(BigInt("420.69").toString());
   // });
 
+  const fetchTransferTokenBalance = async () => {
+    const agent = await HttpAgent.create({ identity });
+    const tokenActor = createTokenActor(transferTokenPrincipal, { agent });
+
+    const tokenBalance = await tokenActor.icrc1_balance_of({ owner: identity!.getPrincipal(), subaccount: [] });
+    setTransferTokenBalance(tokenBalance);
+  }
+
   useEffect(() => {
     if (identity === undefined) return;
 
@@ -362,6 +371,10 @@ function App() {
   useEffect(() => {
     fetchUserInfo();
   }, [selectedPeriod]);
+
+  useEffect(() => {
+    fetchTransferTokenBalance();
+  }, [transferTokenPrincipal]);
 
   const earlyWithdrawText = (): string => {
     if (secsToUnlock == undefined || secsToUnlock == null) {
@@ -614,6 +627,11 @@ function App() {
                               </option>
                             ))}
                           </select>
+                          <p className="text-left ml-1 mt-1 text-sm font-light">Balance: {(parseFloat(transferTokenBalance.toString()) / 100000000)} {" "}
+                            {tokens.find((t) => t.address === transferTokenPrincipal)
+                                  ?.name || tokens[0].name
+                            }
+                          </p>
                         </div>
 
                         {/* transfer to */}
