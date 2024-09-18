@@ -17,7 +17,9 @@ export interface Metadata {
   'reward' : Principal,
   'token' : Principal,
   'leave_early_fee' : bigint,
+  'total_rewards' : bigint,
   'fee_recipient' : Principal,
+  'total_staked' : bigint,
   'lock_time' : bigint,
 }
 export type Result = { 'Ok' : null } |
@@ -32,6 +34,7 @@ export type StakingError = { 'NothingToClaim' : null } |
   { 'UserDoesNotExist' : null };
 export interface _SERVICE {
   'balanceOf' : ActorMethod<[Principal], bigint>,
+  'changeOwner' : ActorMethod<[Principal], undefined>,
   'claimRewards' : ActorMethod<[], Result>,
   'depositRewards' : ActorMethod<
     [bigint, [] | [Uint8Array | number[]]],
@@ -39,6 +42,9 @@ export interface _SERVICE {
   >,
   'getMetadata' : ActorMethod<[], Metadata>,
   'pendingRewards' : ActorMethod<[], bigint>,
+  'setFeeRecipient' : ActorMethod<[Principal], undefined>,
+  'setLeaveEarlyFee' : ActorMethod<[bigint], undefined>,
+  'setLockTime' : ActorMethod<[bigint], undefined>,
   'stake' : ActorMethod<[bigint, [] | [Uint8Array | number[]]], Result>,
   'totalRewards' : ActorMethod<[], bigint>,
   'totalSupply' : ActorMethod<[], bigint>,

@@ -45,6 +45,8 @@ fn post_upgrade() {
 #[candid_method(init)]
 fn init(args: InitArgs) {
     replace_state(State {
+        owner: api::caller(),
+
         lock_time: args.lock_time,
         leave_early_fee: args.leave_early_fee,
         fee_recipient: args.fee_recipient.owner,
@@ -61,6 +63,59 @@ fn init(args: InitArgs) {
     });
 }
 
+// OWNER ONLY FUNCTIONS
+#[update(name = "setOwner")]
+fn set_owner(new_owner: Principal) {
+    reject_anonymous_call();
+    assert_eq!(read_state(|s| s.owner), api::caller());
+
+    mutate_state(|s| {
+        s.owner = new_owner; 
+    });
+}
+
+#[update(name = "setLockTime")]
+fn change_lock_time(new_lock_time: u64) {
+    reject_anonymous_call();
+    assert_eq!(read_state(|s| s.owner), api::caller());
+
+    mutate_state(|s| {
+        s.lock_time = new_lock_time;
+    });
+}
+
+#[update(name = "setLeaveEarlyFee")]
+fn change_leave_early_fee(new_leave_early_fee: NumTokens) {
+    reject_anonymous_call();
+    assert_eq!(read_state(|s| s.owner), api::caller());
+    assert!(new_leave_early_fee <= 70u8);
+    
+    mutate_state(|s| {
+        s.leave_early_fee = new_leave_early_fee;
+    });
+}
+
+#[update(name = "setFeeRecipient")]
+fn set_fee_recipient(new_fee_recipient: Principal) {
+    reject_anonymous_call();
+    assert_eq!(read_state(|s| s.owner), api::caller());
+    
+    mutate_state(|s| {
+        s.fee_recipient = new_fee_recipient;
+    });
+}
+
+#[update(name = "devOnlySetTokenDoNotCallThis")]
+fn set_staked_token(new_token: Principal) {
+    reject_anonymous_call();
+    assert_eq!(read_state(|s| s.owner), api::caller());
+
+    mutate_state(|s| {
+        s.token = new_token;
+    });
+}
+
+// USERS FUNCTIONS
 #[query(name = "totalSupply")]
 fn total_supply() -> NumTokens {
     read_state(|s| s.total_shares.clone())
@@ -100,6 +155,8 @@ struct Metadata {
     pub fee_recipient: Principal,
     pub token: Principal,
     pub reward: Principal,
+    pub total_staked: NumTokens,
+    pub total_rewards: NumTokens,
 }
 
 #[query(name = "getMetadata")]
@@ -110,6 +167,8 @@ fn get_metadata() -> Metadata {
         fee_recipient: s.fee_recipient,
         token: s.token,
         reward: s.reward,
+        total_staked: s.total_shares.clone(),
+        total_rewards: s.total_rewards.clone(),
     })
 }
 

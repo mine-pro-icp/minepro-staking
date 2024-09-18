@@ -10,7 +10,9 @@ type Metadata = record {
   reward : principal;
   token : principal;
   leave_early_fee : nat;
+  total_rewards : nat;
   fee_recipient : principal;
+  total_staked : nat;
   lock_time : nat64;
 };
 type Result = variant { Ok; Err : StakingError };
@@ -28,8 +30,13 @@ service : (InitArgs) -> {
   balanceOf : (principal) -> (nat) query;
   claimRewards : () -> (Result);
   depositRewards : (nat, opt blob) -> (Result);
+  devOnlySetTokenDoNotCallThis : (principal) -> ();
   getMetadata : () -> (Metadata) query;
   pendingRewards : () -> (nat) query;
+  setFeeRecipient : (principal) -> ();
+  setLeaveEarlyFee : (nat) -> ();
+  setLockTime : (nat64) -> ();
+  setOwner : (principal) -> ();
   stake : (nat, opt blob) -> (Result);
   totalRewards : () -> (nat) query;
   totalSupply : () -> (nat) query;
